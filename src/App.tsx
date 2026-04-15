@@ -179,6 +179,67 @@ export default function App() {
     }
   };
 
+  const handleAddHabit = async (name: string) => {
+    if (!user || !profile) return;
+    const newHabit = {
+      id: crypto.randomUUID(),
+      name,
+      streak: 0,
+      createdAt: new Date().toISOString()
+    };
+    try {
+      await updateDoc(doc(db, 'users', user.uid), {
+        habits: [...(profile.habits || []), newHabit]
+      });
+      toast.success('Habit added!');
+    } catch (e) {
+      handleFirestoreError(e, OperationType.UPDATE, 'users');
+    }
+  };
+
+  const handleToggleHabit = async (habitId: string) => {
+    if (!user || !profile || !profile.habits) return;
+    const now = new Date();
+    const updatedHabits = profile.habits.map(h => {
+      if (h.id === habitId) {
+        const lastDate = h.lastCompletedDate ? new Date(h.lastCompletedDate) : null;
+        
+        // If already completed today, do nothing or toggle off (for simplicity we just allow one completion per day)
+        if (lastDate && isSameDay(lastDate, now)) {
+          return h;
+        }
+
+        let newStreak = h.streak;
+        if (lastDate && isSameDay(lastDate, subDays(now, 1))) {
+          newStreak += 1;
+        } else {
+          newStreak = 1;
+        }
+
+        return { ...h, streak: newStreak, lastCompletedDate: now.toISOString() };
+      }
+      return h;
+    });
+
+    try {
+      await updateDoc(doc(db, 'users', user.uid), { habits: updatedHabits });
+      toast.success('Habit updated!');
+    } catch (e) {
+      handleFirestoreError(e, OperationType.UPDATE, 'users');
+    }
+  };
+
+  const handleDeleteHabit = async (habitId: string) => {
+    if (!user || !profile || !profile.habits) return;
+    const updatedHabits = profile.habits.filter(h => h.id !== habitId);
+    try {
+      await updateDoc(doc(db, 'users', user.uid), { habits: updatedHabits });
+      toast.success('Habit removed');
+    } catch (e) {
+      handleFirestoreError(e, OperationType.UPDATE, 'users');
+    }
+  };
+
   const handleOnboardingComplete = async (data: { reminderTime: string; customBreathing: { inhale: number; hold: number; exhale: number; holdPost: number } }) => {
     if (!user) return;
     // Close UI immediately
@@ -343,7 +404,13 @@ export default function App() {
                 exit={{ opacity: 0, y: -10 }}
                 className="max-w-2xl mx-auto"
               >
-                <ProgressScreen userProfile={profile} sessions={sessions} />
+                <ProgressScreen 
+                  userProfile={profile} 
+                  sessions={sessions} 
+                  onAddHabit={handleAddHabit}
+                  onToggleHabit={handleToggleHabit}
+                  onDeleteHabit={handleDeleteHabit}
+                />
               </motion.div>
             )}
             {activeTab === 'settings' && (

@@ -68,6 +68,7 @@ export interface UserProfile {
   lastSessionDate?: string;
   reminderTime?: string;
   onboardingCompleted?: boolean;
+  habits?: Habit[];
   healthDetails?: {
     age?: string;
     gender?: string;
@@ -81,6 +82,14 @@ export interface UserProfile {
     exhale: number;
     holdPost: number;
   };
+}
+
+export interface Habit {
+  id: string;
+  name: string;
+  streak: number;
+  lastCompletedDate?: string;
+  createdAt: string;
 }
 
 export interface SessionRecord {
