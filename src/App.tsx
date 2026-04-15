@@ -168,12 +168,12 @@ export default function App() {
 
   const handleOnboardingComplete = async (data: { reminderTime: string; customBreathing: { inhale: number; hold: number; exhale: number; holdPost: number } }) => {
     if (!user) return;
+    setShowOnboarding(false);
     try {
       await updateDoc(doc(db, 'users', user.uid), {
         reminderTime: data.reminderTime,
         customBreathingConfig: data.customBreathing
       });
-      setShowOnboarding(false);
       toast.success('Preferences saved!');
     } catch (e) {
       handleFirestoreError(e, OperationType.UPDATE, 'users');

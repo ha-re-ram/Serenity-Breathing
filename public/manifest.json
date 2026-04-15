@@ -1,7 +1,7 @@
 {
   "name": "Serenity Breathing",
   "short_name": "Serenity",
-  "description": "Find your calm with guided breathing sessions.",
+  "description": "A professional-grade mindfulness app for guided breathing and stress reduction.",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#FDFCF8",

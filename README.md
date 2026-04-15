@@ -1,88 +1,85 @@
 # Serenity Breathing 🌿
 
-Serenity Breathing is a professional, production-ready mindfulness application designed to help users find their calm through guided breathing sessions. Built with React, Tailwind CSS, and Firebase, it offers a seamless and elegant experience for stress reduction and focus improvement.
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![React](https://img.shields.io/badge/React-19-blue.svg)](https://react.dev/)
+[![Tailwind CSS](https://img.shields.io/badge/Tailwind-4.0-38B2AC.svg)](https://tailwindcss.com/)
+[![Firebase](https://img.shields.io/badge/Firebase-12-FFCA28.svg)](https://firebase.google.com/)
 
-## ✨ Features
+**Serenity Breathing** is a professional-grade, production-ready mindfulness application designed to help users find their calm through guided breathing sessions. Built with a modern tech stack, it offers a seamless, elegant, and highly performant experience for stress reduction and focus improvement.
 
-- **Guided Breathing Modes**: Choose from Box Breathing, 4-7-8 (Sleep), and Coherence modes.
-- **Custom Cycles**: Create your own breathing rhythm by adjusting inhale, hold, and exhale durations.
-- **Progress Tracking**: Monitor your sessions, streaks, and total mindfulness minutes.
-- **Daily Inspiration**: Receive curated mindfulness quotes to start your day.
-- **Personalized Profile**: Save your health details and set daily reminders.
-- **PWA Support**: Installable on mobile and desktop for offline access.
-- **SEO Optimized**: Fully optimized for search engines with proper metadata and sitemaps.
-- **Dark Mode**: Elegant dark and light themes for any environment.
+🔗 **Live Demo**: [serenity.hareramkushwaha.com.np](https://serenity.hareramkushwaha.com.np)
+
+---
+
+## ✨ Key Features
+
+- **🎯 Guided Breathing Modes**: Scientifically-backed patterns including Box Breathing, 4-7-8 (Sleep), and Coherence modes.
+- **⚙️ Custom Cycles**: Fully adjustable inhale, hold, and exhale durations to suit individual needs.
+- **📊 Progress Analytics**: Real-time tracking of sessions, streaks, and total mindfulness minutes.
+- **💡 Daily Inspiration**: Curated mindfulness quotes to foster a positive mindset.
+- **🔔 Personalized Reminders**: Customizable daily notifications to maintain consistency.
+- **📱 PWA Ready**: Fully installable on iOS, Android, and Desktop for a native-app feel.
+- **🔍 SEO Optimized**: Comprehensive metadata and sitemaps for maximum search engine visibility.
+- **🌓 Adaptive Themes**: Polished Dark and Light modes that respect system preferences.
+
+---
 
 ## 🚀 Tech Stack
 
-- **Frontend**: React 19, Vite, Tailwind CSS 4
-- **Animations**: Motion (formerly Framer Motion)
-- **Icons**: Lucide React
-- **Backend**: Firebase (Authentication & Firestore)
-- **Styling**: Shadcn UI components
+- **Frontend**: [React 19](https://react.dev/), [Vite](https://vitejs.dev/), [TypeScript](https://www.typescriptlang.org/)
+- **Styling**: [Tailwind CSS 4](https://tailwindcss.com/), [Shadcn UI](https://ui.shadcn.com/)
+- **Animations**: [Motion](https://motion.dev/)
+- **Backend**: [Firebase](https://firebase.google.com/) (Authentication & Firestore)
+- **Icons**: [Lucide React](https://lucide.dev/)
 
-## 🛠️ Installation & Setup
+---
 
-1. **Clone the repository**:
+## 🛠️ Installation & Development
+
+1. **Clone the Repository**:
    ```bash
    git clone https://github.com/ha-re-ram/serenity-breathing.git
    cd serenity-breathing
    ```
 
-2. **Install dependencies**:
+2. **Install Dependencies**:
    ```bash
    npm install
    ```
 
-3. **Environment Variables**:
-   Create a `.env` file in the root directory and add your Firebase configuration:
-   ```env
-   VITE_FIREBASE_API_KEY=your_api_key
-   VITE_FIREBASE_AUTH_DOMAIN=your_auth_domain
-   VITE_FIREBASE_PROJECT_ID=your_project_id
-   VITE_FIREBASE_STORAGE_BUCKET=your_storage_bucket
-   VITE_FIREBASE_MESSAGING_SENDER_ID=your_messaging_sender_id
-   VITE_FIREBASE_APP_ID=your_app_id
-   VITE_FIREBASE_MEASUREMENT_ID=your_measurement_id
-   ```
+3. **Environment Configuration**:
+   Create a `.env` file in the root directory and populate it with your Firebase credentials (refer to `.env.example`).
 
-4. **Run the development server**:
+4. **Start Development Server**:
    ```bash
    npm run dev
    ```
 
+---
+
 ## 📦 Deployment
 
-### Deploying to Firebase Hosting
+This project is optimized for **Cloudflare Pages**. To deploy your own version:
 
-1. Install Firebase CLI:
-   ```bash
-   npm install -g firebase-tools
-   ```
+1. Push your code to a GitHub repository.
+2. Connect the repository to Cloudflare Pages.
+3. Configure the build settings:
+   - **Build Command**: `npm run build`
+   - **Output Directory**: `dist`
+4. Add your Firebase keys to the **Environment Variables** in the Cloudflare dashboard.
 
-2. Login and initialize:
-   ```bash
-   firebase login
-   ```
-
-3. Build the project:
-   ```bash
-   npm run build
-   ```
-
-4. Deploy:
-   ```bash
-   firebase deploy
-   ```
+---
 
 ## 👤 Developer
 
 **Hareram Kushwaha**
-- Website: [hareramkushwaha.com.np](https://hareramkushwaha.com.np)
-- GitHub: [@ha-re-ram](https://github.com/ha-re-ram)
-- LinkedIn: [Hareram Kushwaha](https://www.linkedin.com/in/ha-re-ram)
-- Email: hareramkushwaha054@gmail.com
+- 🌐 **Website**: [hareramkushwaha.com.np](https://hareramkushwaha.com.np)
+- 🐙 **GitHub**: [@ha-re-ram](https://github.com/ha-re-ram)
+- 💼 **LinkedIn**: [Hareram Kushwaha](https://www.linkedin.com/in/ha-re-ram)
+- 📧 **Email**: [hareramkushwaha054@gmail.com](mailto:hareramkushwaha054@gmail.com)
+
+---
 
 ## 📄 License
 
-This project is licensed under the MIT License.
+This project is licensed under the **MIT License**. See the [LICENSE](LICENSE) file for details.

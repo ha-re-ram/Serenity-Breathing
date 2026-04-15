@@ -58,6 +58,7 @@ export default function OnboardingModal({ onComplete }: OnboardingModalProps) {
                 initial={{ opacity: 0, x: 20 }}
                 animate={{ opacity: 1, x: 0 }}
                 exit={{ opacity: 0, x: -20 }}
+                transition={{ duration: 0.2 }}
                 className="space-y-6"
               >
                 <div className="w-16 h-16 bg-soft-sage/10 rounded-3xl flex items-center justify-center text-soft-sage mb-6">
@@ -84,6 +85,7 @@ export default function OnboardingModal({ onComplete }: OnboardingModalProps) {
                 initial={{ opacity: 0, x: 20 }}
                 animate={{ opacity: 1, x: 0 }}
                 exit={{ opacity: 0, x: -20 }}
+                transition={{ duration: 0.2 }}
                 className="space-y-6"
               >
                 <div className="w-16 h-16 bg-soft-sage/10 rounded-3xl flex items-center justify-center text-soft-sage mb-6">
@@ -141,6 +143,7 @@ export default function OnboardingModal({ onComplete }: OnboardingModalProps) {
                 initial={{ opacity: 0, x: 20 }}
                 animate={{ opacity: 1, x: 0 }}
                 exit={{ opacity: 0, x: -20 }}
+                transition={{ duration: 0.2 }}
                 className="space-y-6 text-center"
               >
                 <div className="w-24 h-24 bg-soft-sage/10 rounded-[40px] flex items-center justify-center text-soft-sage mx-auto mb-8">
