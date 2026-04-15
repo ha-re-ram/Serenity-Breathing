@@ -1,0 +1,122 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // ===============================================================
+    // Assumed Data Model
+    // ===============================================================
+    //
+    // Collection: users
+    // Document ID: userId (UID)
+    // Fields:
+    //   - uid: string (required) - User's unique ID
+    //   - displayName: string (optional) - User's display name
+    //   - email: string (optional) - User's email
+    //   - totalSessions: number (required) - Total sessions completed
+    //   - currentStreak: number (required) - Current daily streak
+    //   - lastSessionDate: string (optional) - ISO date of last session
+    //   - reminderTime: string (optional) - User's preferred reminder time
+    //   - createdAt: string (optional) - ISO date of account creation
+    //
+    // Collection: sessions
+    // Document ID: sessionId (Auto-generated)
+    // Fields:
+    //   - uid: string (required) - User's UID
+    //   - mode: string (required) - Breathing mode (calm, focus, sleep, morning)
+    //   - duration: number (required) - Duration in seconds
+    //   - timestamp: string (required) - ISO date of session
+    //   - moodBefore: string (optional) - Mood before session
+    //   - moodAfter: string (optional) - Mood after session
+    //
+    // Collection: moods
+    // Document ID: moodId (Auto-generated)
+    // Fields:
+    //   - uid: string (required) - User's UID
+    //   - mood: string (required) - Mood value
+    //   - timestamp: string (required) - ISO date of check-in
+    //
+    // ===============================================================
+
+    // ===============================================================
+    // Helper Functions
+    // ===============================================================
+    
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+
+    function isDocOwner() {
+      return isAuthenticated() && request.auth.uid == resource.data.uid;
+    }
+
+    function requestMatchesUid() {
+      return isAuthenticated() && request.auth.uid == request.resource.data.uid;
+    }
+
+    function isValidEmail(email) {
+      return email is string && email.matches("^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$");
+    }
+
+    function isValidDateString(dateStr) {
+      return dateStr is string && dateStr.matches("^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}.*Z?$");
+    }
+
+    // ===============================================================
+    // Domain Validators
+    // ===============================================================
+
+    function isValidUser(data) {
+      return data.keys().hasAll(['uid', 'totalSessions', 'currentStreak']) &&
+             data.uid is string &&
+             data.totalSessions is number && data.totalSessions >= 0 &&
+             data.currentStreak is number && data.currentStreak >= 0 &&
+             (!('email' in data) || isValidEmail(data.email)) &&
+             (!('lastSessionDate' in data) || isValidDateString(data.lastSessionDate));
+    }
+
+    function isValidSession(data) {
+      return data.keys().hasAll(['uid', 'mode', 'duration', 'timestamp']) &&
+             data.uid is string &&
+             data.mode in ['calm', 'focus', 'sleep', 'morning'] &&
+             data.duration is number && data.duration > 0 &&
+             isValidDateString(data.timestamp);
+    }
+
+    function isValidMood(data) {
+      return data.keys().hasAll(['uid', 'mood', 'timestamp']) &&
+             data.uid is string &&
+             data.mood is string &&
+             isValidDateString(data.timestamp);
+    }
+
+    // ===============================================================
+    // Rules
+    // ===============================================================
+
+    match /users/{userId} {
+      allow read: if isOwner(userId);
+      allow create: if isOwner(userId) && isValidUser(request.resource.data);
+      allow update: if isOwner(userId) && isValidUser(request.resource.data);
+    }
+
+    match /sessions/{sessionId} {
+      allow read: if isAuthenticated() && (resource == null || resource.data.uid == request.auth.uid);
+      allow create: if requestMatchesUid() && isValidSession(request.resource.data);
+      allow delete: if isDocOwner();
+    }
+
+    match /moods/{moodId} {
+      allow read: if isAuthenticated() && (resource == null || resource.data.uid == request.auth.uid);
+      allow create: if requestMatchesUid() && isValidMood(request.resource.data);
+      allow delete: if isDocOwner();
+    }
+
+    // Default deny
+    match /{path=**} {
+      allow read, write: if false;
+    }
+  }
+}
