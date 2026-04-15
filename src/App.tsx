@@ -45,6 +45,7 @@ export default function App() {
   const [activeTab, setActiveTab] = useState<'home' | 'progress' | 'settings'>('home');
   const [activeSession, setActiveSession] = useState<BreathingMode | null>(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [selectedMood, setSelectedMood] = useState<string | undefined>();
   const [selectedDuration, setSelectedDuration] = useState(5);
   const [showOnboarding, setShowOnboarding] = useState(false);
@@ -61,7 +62,16 @@ export default function App() {
         setLoading(false);
       }
     });
-    return unsubscribe;
+
+    // Safety timeout: if loading takes more than 8 seconds, force stop loading
+    const timer = setTimeout(() => {
+      setLoading(false);
+    }, 8000);
+
+    return () => {
+      unsubscribe();
+      clearTimeout(timer);
+    };
   }, []);
 
   // Profile and Sessions Listener
@@ -95,12 +105,20 @@ export default function App() {
           .catch(e => handleFirestoreError(e, OperationType.WRITE, 'users'))
           .finally(() => setLoading(false));
       }
-    }, (e) => handleFirestoreError(e, OperationType.GET, 'users'));
+    }, (e) => {
+      console.error("Profile Snapshot Error:", e);
+      setError("Failed to load user profile. Please check your internet connection.");
+      setLoading(false);
+      handleFirestoreError(e, OperationType.GET, 'users');
+    });
 
     const unsubSessions = onSnapshot(sessionsQuery, (snap) => {
       const docs = snap.docs.map(d => ({ id: d.id, ...d.data() } as SessionRecord));
       setSessions(docs.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()));
-    }, (e) => handleFirestoreError(e, OperationType.GET, 'sessions'));
+    }, (e) => {
+      console.error("Sessions Snapshot Error:", e);
+      handleFirestoreError(e, OperationType.GET, 'sessions');
+    });
 
     return () => {
       unsubProfile();
@@ -310,12 +328,33 @@ export default function App() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-screen bg-bg-page">
+      <div className="flex flex-col items-center justify-center h-screen bg-bg-page gap-4">
         <motion.div
           animate={{ scale: [1, 1.2, 1], opacity: [0.5, 1, 0.5] }}
           transition={{ duration: 2, repeat: Infinity }}
           className="w-16 h-16 bg-soft-sage rounded-full blur-xl"
         />
+        <p className="text-xs font-bold text-accent-green uppercase tracking-widest animate-pulse">Loading Serenity...</p>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex flex-col items-center justify-center h-screen bg-bg-page p-8 text-center gap-6">
+        <div className="w-16 h-16 bg-rose-50 rounded-full flex items-center justify-center">
+          <Bell className="w-8 h-8 text-rose-500" />
+        </div>
+        <div className="space-y-2">
+          <h2 className="text-2xl font-serif text-deep-forest">Something went wrong</h2>
+          <p className="text-sm text-accent-green opacity-70 max-w-xs mx-auto">{error}</p>
+        </div>
+        <Button 
+          onClick={() => window.location.reload()} 
+          className="bg-accent-green text-white rounded-full px-8"
+        >
+          Try Again
+        </Button>
       </div>
     );
   }
