@@ -88,14 +88,18 @@ export default function SessionScreen({ mode, customConfig, onEnd, onCancel }: S
 
   const handleFinish = () => {
     setIsActive(false);
-    // Small delay before showing mood check for a smoother transition
-    setTimeout(() => setShowMoodAfter(true), 500);
+    // Show mood check immediately
+    setShowMoodAfter(true);
   };
 
   const handleMoodAfterSelect = (mood: string) => {
     setMoodAfter(mood);
     // Close immediately
     onEnd(seconds, mood);
+  };
+
+  const handleSkip = () => {
+    onEnd(seconds);
   };
 
   if (showMoodAfter) {
@@ -108,7 +112,7 @@ export default function SessionScreen({ mode, customConfig, onEnd, onCancel }: S
         </div>
         <Button 
           variant="ghost" 
-          onClick={() => onEnd(seconds)}
+          onClick={handleSkip}
           className="mt-8 text-accent-green opacity-50"
         >
           Skip

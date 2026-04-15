@@ -1,11 +1,11 @@
 # Serenity Breathing 🌿
 
+**Serenity Breathing** by [Hareram Kushwaha](https://hareramkushwaha.com.np) is a premier mindfulness and guided meditation application designed to help you reduce stress, improve focus, and achieve better sleep through professional breathing exercises.
+
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![React](https://img.shields.io/badge/React-19-blue.svg)](https://react.dev/)
 [![Tailwind CSS](https://img.shields.io/badge/Tailwind-4.0-38B2AC.svg)](https://tailwindcss.com/)
 [![Firebase](https://img.shields.io/badge/Firebase-12-FFCA28.svg)](https://firebase.google.com/)
-
-**Serenity Breathing** is a professional-grade, production-ready mindfulness application designed to help users find their calm through guided breathing sessions. Built with a modern tech stack, it offers a seamless, elegant, and highly performant experience for stress reduction and focus improvement.
 
 🔗 **Live Demo**: [serenity.hareramkushwaha.com.np](https://serenity.hareramkushwaha.com.np)
 
@@ -14,6 +14,7 @@
 ## ✨ Key Features
 
 - **🎯 Guided Breathing Modes**: Scientifically-backed patterns including Box Breathing, 4-7-8 (Sleep), and Coherence modes.
+- **📊 Mood Insights Dashboard**: Track your emotional balance and see how your mindfulness practice improves your mood over time.
 - **⚙️ Custom Cycles**: Fully adjustable inhale, hold, and exhale durations to suit individual needs.
 - **📊 Progress Analytics**: Real-time tracking of sessions, streaks, and total mindfulness minutes.
 - **💡 Daily Inspiration**: Curated mindfulness quotes to foster a positive mindset.

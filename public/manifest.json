@@ -8,12 +8,12 @@
   "theme_color": "#5A5A40",
   "icons": [
     {
-      "src": "https://cdn-icons-png.flaticon.com/512/3063/3063822.png",
+      "src": "https://images.unsplash.com/photo-1545389336-cf090694435e?auto=format&fit=crop&w=192&h=192&q=80",
       "sizes": "192x192",
       "type": "image/png"
     },
     {
-      "src": "https://cdn-icons-png.flaticon.com/512/3063/3063822.png",
+      "src": "https://images.unsplash.com/photo-1545389336-cf090694435e?auto=format&fit=crop&w=512&h=512&q=80",
       "sizes": "512x512",
       "type": "image/png"
     }

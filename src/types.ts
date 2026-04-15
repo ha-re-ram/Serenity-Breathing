@@ -67,6 +67,7 @@ export interface UserProfile {
   currentStreak: number;
   lastSessionDate?: string;
   reminderTime?: string;
+  onboardingCompleted?: boolean;
   healthDetails?: {
     age?: string;
     gender?: string;

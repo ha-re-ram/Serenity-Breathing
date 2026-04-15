@@ -48,7 +48,6 @@ export default function App() {
   const [selectedMood, setSelectedMood] = useState<string | undefined>();
   const [selectedDuration, setSelectedDuration] = useState(5);
   const [showOnboarding, setShowOnboarding] = useState(false);
-  const [hasJustCompletedOnboarding, setHasJustCompletedOnboarding] = useState(false);
 
   const { theme, setTheme } = useTheme();
 
@@ -76,9 +75,11 @@ export default function App() {
       if (docSnap.exists()) {
         const data = docSnap.data() as UserProfile;
         setProfile(data);
-        // Show onboarding if critical settings are missing AND we haven't just completed it
-        if (!hasJustCompletedOnboarding && (!data.reminderTime || !data.customBreathingConfig)) {
+        // Show onboarding if not completed
+        if (!data.onboardingCompleted) {
           setShowOnboarding(true);
+        } else {
+          setShowOnboarding(false);
         }
         setLoading(false);
       } else {
@@ -156,8 +157,9 @@ export default function App() {
   const handleUpdateCustomBreathing = async (field: string, value: number) => {
     if (!user || !profile) return;
     try {
+      const currentConfig = profile.customBreathingConfig || { inhale: 4, hold: 4, exhale: 4, holdPost: 4 };
       const updatedConfig = {
-        ...(profile.customBreathingConfig || { inhale: 4, hold: 4, exhale: 4, holdPost: 4 }),
+        ...currentConfig,
         [field]: value
       };
       await updateDoc(doc(db, 'users', user.uid), { customBreathingConfig: updatedConfig });
@@ -167,18 +169,30 @@ export default function App() {
     }
   };
 
+  const handleUpdateFullBreathingConfig = async (config: { inhale: number; hold: number; exhale: number; holdPost: number }) => {
+    if (!user) return;
+    try {
+      await updateDoc(doc(db, 'users', user.uid), { customBreathingConfig: config });
+      toast.success('Breathing cycle updated');
+    } catch (e) {
+      handleFirestoreError(e, OperationType.UPDATE, 'users');
+    }
+  };
+
   const handleOnboardingComplete = async (data: { reminderTime: string; customBreathing: { inhale: number; hold: number; exhale: number; holdPost: number } }) => {
     if (!user) return;
+    // Close UI immediately
     setShowOnboarding(false);
-    setHasJustCompletedOnboarding(true);
     try {
       await updateDoc(doc(db, 'users', user.uid), {
         reminderTime: data.reminderTime,
-        customBreathingConfig: data.customBreathing
+        customBreathingConfig: data.customBreathing,
+        onboardingCompleted: true
       });
       toast.success('Preferences saved!');
     } catch (e) {
       handleFirestoreError(e, OperationType.UPDATE, 'users');
+      // If it failed, we might want to show it again, but usually better to let them try later
     }
   };
 
@@ -410,12 +424,9 @@ export default function App() {
                       </div>
                     </div>
 
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-6 border-t border-cream/50">
+                    <div className="grid grid-cols-1 gap-4 pt-6 border-t border-cream/50">
                       <Button variant="outline" onClick={handleLogout} className="w-full border-cream text-accent-green hover:bg-rose-50 hover:text-rose-500 hover:border-rose-100 rounded-2xl h-12">
                         <LogOut className="w-4 h-4 mr-2" /> Sign Out
-                      </Button>
-                      <Button variant="outline" className="w-full border-cream text-accent-green hover:bg-bg-page rounded-2xl h-12">
-                        <Mail className="w-4 h-4 mr-2" /> Change Email
                       </Button>
                     </div>
                   </CardContent>
@@ -479,10 +490,12 @@ export default function App() {
                           <button
                             key={rec.label}
                             onClick={() => {
-                              handleUpdateCustomBreathing('inhale', rec.inhale);
-                              handleUpdateCustomBreathing('hold', rec.hold);
-                              handleUpdateCustomBreathing('exhale', rec.exhale);
-                              handleUpdateCustomBreathing('holdPost', rec.holdPost);
+                              handleUpdateFullBreathingConfig({
+                                inhale: rec.inhale,
+                                hold: rec.hold,
+                                exhale: rec.exhale,
+                                holdPost: rec.holdPost
+                              });
                             }}
                             className="px-3 py-1 rounded-full border border-cream text-[10px] font-bold text-accent-green hover:bg-bg-page transition-colors"
                           >
@@ -496,8 +509,8 @@ export default function App() {
                           <Label className="text-[10px] uppercase opacity-50">Inhale</Label>
                           <Input 
                             type="number" 
-                            defaultValue={profile?.customBreathingConfig?.inhale || 4} 
-                            onBlur={(e) => handleUpdateCustomBreathing('inhale', Number(e.target.value))}
+                            value={profile?.customBreathingConfig?.inhale || 4} 
+                            onChange={(e) => handleUpdateCustomBreathing('inhale', Number(e.target.value))}
                             className="h-10 rounded-xl border-cream bg-bg-page/30"
                           />
                         </div>
@@ -505,8 +518,8 @@ export default function App() {
                           <Label className="text-[10px] uppercase opacity-50">Hold</Label>
                           <Input 
                             type="number" 
-                            defaultValue={profile?.customBreathingConfig?.hold || 4} 
-                            onBlur={(e) => handleUpdateCustomBreathing('hold', Number(e.target.value))}
+                            value={profile?.customBreathingConfig?.hold || 4} 
+                            onChange={(e) => handleUpdateCustomBreathing('hold', Number(e.target.value))}
                             className="h-10 rounded-xl border-cream bg-bg-page/30"
                           />
                         </div>
@@ -514,8 +527,8 @@ export default function App() {
                           <Label className="text-[10px] uppercase opacity-50">Exhale</Label>
                           <Input 
                             type="number" 
-                            defaultValue={profile?.customBreathingConfig?.exhale || 4} 
-                            onBlur={(e) => handleUpdateCustomBreathing('exhale', Number(e.target.value))}
+                            value={profile?.customBreathingConfig?.exhale || 4} 
+                            onChange={(e) => handleUpdateCustomBreathing('exhale', Number(e.target.value))}
                             className="h-10 rounded-xl border-cream bg-bg-page/30"
                           />
                         </div>
@@ -523,8 +536,8 @@ export default function App() {
                           <Label className="text-[10px] uppercase opacity-50">Hold Post</Label>
                           <Input 
                             type="number" 
-                            defaultValue={profile?.customBreathingConfig?.holdPost || 4} 
-                            onBlur={(e) => handleUpdateCustomBreathing('holdPost', Number(e.target.value))}
+                            value={profile?.customBreathingConfig?.holdPost || 4} 
+                            onChange={(e) => handleUpdateCustomBreathing('holdPost', Number(e.target.value))}
                             className="h-10 rounded-xl border-cream bg-bg-page/30"
                           />
                         </div>

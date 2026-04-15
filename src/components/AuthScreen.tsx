@@ -104,44 +104,47 @@ export default function AuthScreen({ onGoogleLogin }: AuthScreenProps) {
 
   if (isResetting) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-screen bg-bg-page p-8 text-center">
-        <button 
-          onClick={() => setIsResetting(false)}
-          className="absolute top-12 left-8 text-accent-green flex items-center gap-2 font-medium"
-        >
-          <ChevronLeft className="w-5 h-5" /> Back
-        </button>
-        <h1 className="text-3xl font-serif text-deep-forest mb-4">Reset Password</h1>
-        <p className="text-accent-green mb-8 opacity-70">Enter your email to receive a reset link.</p>
-        <form onSubmit={handleResetPassword} className="w-full space-y-4">
-          <div className="space-y-2 text-left">
-            <Label htmlFor="reset-email">Email</Label>
-            <Input 
-              id="reset-email" 
-              type="email" 
-              placeholder="name@example.com" 
-              value={email} 
-              onChange={(e) => setEmail(e.target.value)}
-              className="rounded-xl border-cream"
-            />
-          </div>
-          <Button type="submit" disabled={loading} className="w-full h-12 rounded-full bg-accent-green text-white font-bold shadow-lg shadow-accent-green/20">
-            {loading ? 'Sending link...' : 'Send Reset Link'}
-          </Button>
-        </form>
+      <div className="flex flex-col items-center justify-center min-h-screen bg-bg-page p-8">
+        <div className="w-full max-w-md flex flex-col items-center text-center relative">
+          <button 
+            onClick={() => setIsResetting(false)}
+            className="absolute -top-12 left-0 text-accent-green flex items-center gap-2 font-medium"
+          >
+            <ChevronLeft className="w-5 h-5" /> Back
+          </button>
+          <h1 className="text-3xl font-serif text-deep-forest mb-4">Reset Password</h1>
+          <p className="text-accent-green mb-8 opacity-70">Enter your email to receive a reset link.</p>
+          <form onSubmit={handleResetPassword} className="w-full space-y-4">
+            <div className="space-y-2 text-left">
+              <Label htmlFor="reset-email">Email</Label>
+              <Input 
+                id="reset-email" 
+                type="email" 
+                placeholder="name@example.com" 
+                value={email} 
+                onChange={(e) => setEmail(e.target.value)}
+                className="rounded-xl border-cream"
+              />
+            </div>
+            <Button type="submit" disabled={loading} className="w-full h-12 rounded-full bg-accent-green text-white font-bold shadow-lg shadow-accent-green/20">
+              {loading ? 'Sending link...' : 'Send Reset Link'}
+            </Button>
+          </form>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-bg-page p-8 text-center">
-      <div className="w-20 h-20 bg-white rounded-[40px] flex items-center justify-center mb-6 border border-cream shadow-sm">
-        <div className="w-10 h-10 bg-accent-green rounded-full animate-pulse" />
-      </div>
-      <h1 className="text-4xl font-serif text-deep-forest mb-2">Serenity</h1>
-      <p className="text-accent-green mb-12 opacity-70">Find your calm, anywhere.</p>
+    <div className="flex flex-col items-center justify-center min-h-screen bg-bg-page p-8">
+      <div className="w-full max-w-md flex flex-col items-center text-center">
+        <div className="w-20 h-20 bg-white rounded-[40px] flex items-center justify-center mb-6 border border-cream shadow-sm">
+          <div className="w-10 h-10 bg-accent-green rounded-full animate-pulse" />
+        </div>
+        <h1 className="text-4xl font-serif text-deep-forest mb-2">Serenity</h1>
+        <p className="text-accent-green mb-12 opacity-70">Find your calm, anywhere.</p>
 
-      <Tabs defaultValue="login" className="w-full">
+        <Tabs defaultValue="login" className="w-full">
         <TabsList className="grid w-full grid-cols-2 mb-8 bg-cream/20 rounded-full p-1">
           <TabsTrigger value="login" className="rounded-full data-[state=active]:bg-white data-[state=active]:text-accent-green">Login</TabsTrigger>
           <TabsTrigger value="signup" className="rounded-full data-[state=active]:bg-white data-[state=active]:text-accent-green">Sign Up</TabsTrigger>
@@ -243,5 +246,6 @@ export default function AuthScreen({ onGoogleLogin }: AuthScreenProps) {
         Google
       </Button>
     </div>
-  );
+  </div>
+);
 }
