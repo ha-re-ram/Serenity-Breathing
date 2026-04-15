@@ -109,6 +109,60 @@ export default function ProgressScreen({ userProfile, sessions }: ProgressScreen
         </CardContent>
       </Card>
 
+      {/* Mood Insights */}
+      <section>
+        <h2 className="text-[10px] font-bold text-accent-green uppercase tracking-[2px] mb-4 px-2 opacity-50">Mood Insights</h2>
+        <Card className="border border-cream shadow-none bg-card rounded-[20px]">
+          <CardContent className="p-6">
+            <div className="flex flex-col gap-6">
+              <div className="flex items-center justify-between">
+                <div className="flex flex-col">
+                  <span className="text-sm font-bold text-deep-forest">Emotional Balance</span>
+                  <span className="text-[10px] text-accent-green opacity-60">Your most frequent post-session moods</span>
+                </div>
+                <div className="flex -space-x-2">
+                  {['😌', '🌿', '🎯'].map((emoji, i) => (
+                    <div key={i} className="w-8 h-8 rounded-full bg-white border border-cream flex items-center justify-center text-sm shadow-sm">
+                      {emoji}
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div className="space-y-4">
+                {[
+                  { mood: 'calm', label: 'Calm', emoji: '😌', color: 'bg-blue-400' },
+                  { mood: 'relaxed', label: 'Relaxed', emoji: '🌿', color: 'bg-green-400' },
+                  { mood: 'focused', label: 'Focused', emoji: '🎯', color: 'bg-purple-400' },
+                ].map((item) => {
+                  const count = sessions.filter(s => s.moodAfter === item.mood).length;
+                  const totalWithMood = sessions.filter(s => s.moodAfter).length || 1;
+                  const percentage = Math.round((count / totalWithMood) * 100);
+                  
+                  return (
+                    <div key={item.mood} className="space-y-1.5">
+                      <div className="flex justify-between text-[10px] font-bold uppercase tracking-wider">
+                        <span className="text-deep-forest flex items-center gap-1.5">
+                          <span>{item.emoji}</span> {item.label}
+                        </span>
+                        <span className="text-accent-green opacity-60">{percentage}%</span>
+                      </div>
+                      <div className="h-1.5 w-full bg-bg-page rounded-full overflow-hidden">
+                        <motion.div 
+                          initial={{ width: 0 }}
+                          animate={{ width: `${percentage}%` }}
+                          className={`h-full ${item.color} opacity-60`}
+                        />
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </section>
+
       {/* Achievements */}
       <section>
         <h2 className="text-[10px] font-bold text-accent-green uppercase tracking-[2px] mb-4 px-2 opacity-50">Achievements</h2>

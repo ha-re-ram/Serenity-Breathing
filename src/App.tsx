@@ -48,6 +48,7 @@ export default function App() {
   const [selectedMood, setSelectedMood] = useState<string | undefined>();
   const [selectedDuration, setSelectedDuration] = useState(5);
   const [showOnboarding, setShowOnboarding] = useState(false);
+  const [hasJustCompletedOnboarding, setHasJustCompletedOnboarding] = useState(false);
 
   const { theme, setTheme } = useTheme();
 
@@ -75,8 +76,8 @@ export default function App() {
       if (docSnap.exists()) {
         const data = docSnap.data() as UserProfile;
         setProfile(data);
-        // Show onboarding if critical settings are missing
-        if (!data.reminderTime || !data.customBreathingConfig) {
+        // Show onboarding if critical settings are missing AND we haven't just completed it
+        if (!hasJustCompletedOnboarding && (!data.reminderTime || !data.customBreathingConfig)) {
           setShowOnboarding(true);
         }
         setLoading(false);
@@ -169,6 +170,7 @@ export default function App() {
   const handleOnboardingComplete = async (data: { reminderTime: string; customBreathing: { inhale: number; hold: number; exhale: number; holdPost: number } }) => {
     if (!user) return;
     setShowOnboarding(false);
+    setHasJustCompletedOnboarding(true);
     try {
       await updateDoc(doc(db, 'users', user.uid), {
         reminderTime: data.reminderTime,
@@ -186,6 +188,9 @@ export default function App() {
 
   const endSession = async (duration: number, moodAfter?: string) => {
     if (!user || !activeSession) return;
+
+    // Close session immediately for snappy feel
+    setActiveSession(null);
 
     const now = new Date();
     const sessionData: any = {
@@ -223,7 +228,6 @@ export default function App() {
       }
 
       toast.success('Session completed! Well done.');
-      setActiveSession(null);
     } catch (error) {
       handleFirestoreError(error, OperationType.WRITE, 'sessions');
     }
