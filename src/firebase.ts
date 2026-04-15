@@ -1,11 +1,20 @@
 import { initializeApp } from 'firebase/app';
 import { getAuth } from 'firebase/auth';
 import { getFirestore, doc, getDocFromServer } from 'firebase/firestore';
-import firebaseConfig from '../firebase-applet-config.json';
+const firebaseConfig = {
+  apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
+  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
+  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
+  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
+  appId: import.meta.env.VITE_FIREBASE_APP_ID,
+  measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID,
+  firestoreDatabaseId: import.meta.env.VITE_FIREBASE_DATABASE_ID || '(default)'
+};
 
 const app = initializeApp(firebaseConfig);
 // Use the provided database ID or default to '(default)'
-export const db = getFirestore(app, firebaseConfig.firestoreDatabaseId || '(default)');
+export const db = getFirestore(app, firebaseConfig.firestoreDatabaseId);
 export const auth = getAuth(app);
 
 // Test connection to Firestore
@@ -22,7 +31,7 @@ async function testConnection() {
     } else if (error.code === 'permission-denied') {
       console.log("Note: Permission denied is actually a good sign! It means we reached the server but were blocked by rules (which is expected for this test).");
     } else {
-      console.error("SUGGESTION: Check if your Project ID and API Key in firebase-applet-config.json are correct.");
+      console.error("SUGGESTION: Check if your Project ID and API Key in your environment variables are correct.");
     }
   }
 }
