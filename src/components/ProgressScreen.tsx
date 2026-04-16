@@ -83,7 +83,34 @@ export default function ProgressScreen({
               {userProfile?.healthDetails?.height && (
                 <div className="flex flex-col">
                   <span className="text-[10px] uppercase opacity-50">Height</span>
-                  <span className="font-bold text-deep-forest">{userProfile.healthDetails.height}</span>
+                  <span className="font-bold text-deep-forest">{userProfile.healthDetails.height} cm</span>
+                </div>
+              )}
+              {userProfile?.healthDetails?.weight && userProfile?.healthDetails?.height && (
+                <div className="flex flex-col col-span-2 mt-2 pt-2 border-t border-cream/30">
+                  <span className="text-[10px] uppercase opacity-50 mb-1">Health Metric (BMI)</span>
+                  <div className="flex items-center gap-2">
+                    <span className="text-lg font-bold text-deep-forest">
+                      {(parseFloat(userProfile.healthDetails.weight) / ((parseFloat(userProfile.healthDetails.height) / 100) ** 2)).toFixed(1)}
+                    </span>
+                    <span className={`text-[10px] font-bold uppercase tracking-widest px-2 py-0.5 rounded-full bg-bg-page ${
+                      (() => {
+                        const bmi = parseFloat(userProfile.healthDetails.weight) / ((parseFloat(userProfile.healthDetails.height) / 100) ** 2);
+                        if (bmi < 18.5) return 'text-blue-500';
+                        if (bmi < 25) return 'text-soft-sage';
+                        if (bmi < 30) return 'text-amber-500';
+                        return 'text-rose-500';
+                      })()
+                    }`}>
+                      {(() => {
+                        const bmi = parseFloat(userProfile.healthDetails.weight) / ((parseFloat(userProfile.healthDetails.height) / 100) ** 2);
+                        if (bmi < 18.5) return 'Nourishment Needed';
+                        if (bmi < 25) return 'Pure Serenity';
+                        if (bmi < 30) return 'Self-care Goal';
+                        return 'Health Priority';
+                      })()}
+                    </span>
+                  </div>
                 </div>
               )}
             </CardContent>

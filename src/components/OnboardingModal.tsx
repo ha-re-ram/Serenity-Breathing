@@ -1,10 +1,10 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Clock, Wind, CheckCircle2, ChevronRight, Sparkles } from 'lucide-react';
+import { Clock, Wind, CheckCircle2, ChevronRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Card, CardContent } from '@/components/ui/card';
+import { Card } from '@/components/ui/card';
 
 interface OnboardingModalProps {
   onComplete: (data: { reminderTime: string; customBreathing: { inhale: number; hold: number; exhale: number; holdPost: number } }) => void;
@@ -35,14 +35,16 @@ export default function OnboardingModal({ onComplete }: OnboardingModalProps) {
   };
 
   return (
-    <div className="fixed inset-0 z-[100] bg-deep-forest/40 backdrop-blur-md flex items-center justify-center p-6">
+    // Full-screen overlay with scroll support
+    <div className="fixed inset-0 z-[100] bg-deep-forest/40 backdrop-blur-md flex items-center justify-center p-4 overflow-y-auto">
       <motion.div
         initial={{ opacity: 0, scale: 0.9, y: 20 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
-        className="w-full max-w-md bg-bg-page rounded-[40px] shadow-2xl overflow-hidden border border-cream"
+        className="w-full max-w-md bg-bg-page rounded-[40px] shadow-2xl border border-cream my-auto"
       >
-        <div className="p-8">
-          <div className="flex justify-between items-center mb-8">
+        <div className="p-6 sm:p-8 flex flex-col gap-6">
+          {/* Progress indicator */}
+          <div className="flex justify-between items-center">
             <div className="flex gap-1">
               {[1, 2, 3].map((i) => (
                 <div key={i} className={`h-1 rounded-full transition-all ${step >= i ? 'w-8 bg-accent-green' : 'w-4 bg-cream'}`} />
@@ -51,6 +53,7 @@ export default function OnboardingModal({ onComplete }: OnboardingModalProps) {
             <span className="text-[10px] font-bold text-accent-green uppercase tracking-widest opacity-50">Step {step} of 3</span>
           </div>
 
+          {/* Step content */}
           <AnimatePresence mode="wait">
             {step === 1 && (
               <motion.div
@@ -59,21 +62,23 @@ export default function OnboardingModal({ onComplete }: OnboardingModalProps) {
                 animate={{ opacity: 1, x: 0 }}
                 exit={{ opacity: 0, x: -20 }}
                 transition={{ duration: 0.2 }}
-                className="space-y-6"
+                className="flex flex-col gap-5"
               >
-                <div className="w-16 h-16 bg-soft-sage/10 rounded-3xl flex items-center justify-center text-soft-sage mb-6">
-                  <Clock className="w-8 h-8" />
+                <div className="w-14 h-14 bg-soft-sage/10 rounded-3xl flex items-center justify-center text-soft-sage">
+                  <Clock className="w-7 h-7" />
                 </div>
-                <h2 className="text-3xl font-serif text-deep-forest">Set a Reminder</h2>
-                <p className="text-accent-green opacity-70">Consistency is key to mindfulness. When would you like to take a moment for yourself?</p>
+                <div>
+                  <h2 className="text-2xl sm:text-3xl font-serif text-deep-forest mb-2">Set a Reminder</h2>
+                  <p className="text-accent-green opacity-70 text-sm leading-relaxed">Consistency is key to mindfulness. When would you like to take a moment for yourself?</p>
+                </div>
                 <div className="space-y-2">
                   <Label htmlFor="reminder">Daily Reminder Time</Label>
-                  <Input 
-                    id="reminder" 
-                    type="time" 
-                    value={reminderTime} 
+                  <Input
+                    id="reminder"
+                    type="time"
+                    value={reminderTime}
                     onChange={(e) => setReminderTime(e.target.value)}
-                    className="h-14 rounded-2xl border-cream bg-white text-lg font-bold text-deep-forest"
+                    className="h-12 rounded-2xl border-cream bg-white text-base font-bold text-deep-forest"
                   />
                 </div>
               </motion.div>
@@ -86,35 +91,39 @@ export default function OnboardingModal({ onComplete }: OnboardingModalProps) {
                 animate={{ opacity: 1, x: 0 }}
                 exit={{ opacity: 0, x: -20 }}
                 transition={{ duration: 0.2 }}
-                className="space-y-6"
+                className="flex flex-col gap-5"
               >
-                <div className="w-16 h-16 bg-soft-sage/10 rounded-3xl flex items-center justify-center text-soft-sage mb-6">
-                  <Wind className="w-8 h-8" />
+                <div className="w-14 h-14 bg-soft-sage/10 rounded-3xl flex items-center justify-center text-soft-sage">
+                  <Wind className="w-7 h-7" />
                 </div>
-                <h2 className="text-3xl font-serif text-deep-forest">Your Rhythm</h2>
-                <p className="text-accent-green opacity-70">Everyone breathes differently. Customize your personal breathing cycle or pick a recommendation.</p>
-                
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-1">
-                    <Label className="text-[10px] uppercase opacity-50">Inhale (s)</Label>
-                    <Input type="number" value={inhale} onChange={(e) => setInhale(Number(e.target.value))} className="h-12 rounded-xl border-cream" />
-                  </div>
-                  <div className="space-y-1">
-                    <Label className="text-[10px] uppercase opacity-50">Hold (s)</Label>
-                    <Input type="number" value={hold} onChange={(e) => setHold(Number(e.target.value))} className="h-12 rounded-xl border-cream" />
-                  </div>
-                  <div className="space-y-1">
-                    <Label className="text-[10px] uppercase opacity-50">Exhale (s)</Label>
-                    <Input type="number" value={exhale} onChange={(e) => setExhale(Number(e.target.value))} className="h-12 rounded-xl border-cream" />
-                  </div>
-                  <div className="space-y-1">
-                    <Label className="text-[10px] uppercase opacity-50">Hold Post (s)</Label>
-                    <Input type="number" value={holdPost} onChange={(e) => setHoldPost(Number(e.target.value))} className="h-12 rounded-xl border-cream" />
-                  </div>
+                <div>
+                  <h2 className="text-2xl sm:text-3xl font-serif text-deep-forest mb-2">Your Rhythm</h2>
+                  <p className="text-accent-green opacity-70 text-sm leading-relaxed">Customize your breathing cycle or pick a recommendation below.</p>
                 </div>
 
-                <div className="space-y-3 pt-4">
-                  <p className="text-[10px] font-bold text-accent-green uppercase tracking-widest opacity-50">Recommended</p>
+                <div className="grid grid-cols-2 gap-3">
+                  {[
+                    { label: 'Inhale (s)', val: inhale, set: setInhale },
+                    { label: 'Hold (s)', val: hold, set: setHold },
+                    { label: 'Exhale (s)', val: exhale, set: setExhale },
+                    { label: 'Hold Post (s)', val: holdPost, set: setHoldPost },
+                  ].map((item) => (
+                    <div key={item.label} className="space-y-1">
+                      <Label className="text-[10px] uppercase opacity-50">{item.label}</Label>
+                      <Input
+                        type="number"
+                        min={0}
+                        max={30}
+                        value={item.val}
+                        onChange={(e) => item.set(Number(e.target.value))}
+                        className="h-11 rounded-xl border-cream"
+                      />
+                    </div>
+                  ))}
+                </div>
+
+                <div className="flex flex-col gap-2">
+                  <p className="text-[10px] font-bold text-accent-green uppercase tracking-widest opacity-50">Recommended Presets</p>
                   {recommendations.map((rec, i) => (
                     <button
                       key={i}
@@ -124,10 +133,10 @@ export default function OnboardingModal({ onComplete }: OnboardingModalProps) {
                         setExhale(rec.exhale);
                         setHoldPost(rec.holdPost);
                       }}
-                      className="w-full p-4 rounded-2xl border border-cream bg-white hover:border-soft-sage transition-all text-left flex justify-between items-center group"
+                      className="w-full p-3 rounded-2xl border border-cream bg-white hover:border-soft-sage transition-all text-left flex justify-between items-center group"
                     >
                       <div>
-                        <p className="font-bold text-deep-forest group-hover:text-accent-green">{rec.label}</p>
+                        <p className="font-bold text-deep-forest text-sm group-hover:text-accent-green">{rec.label}</p>
                         <p className="text-[10px] text-accent-green opacity-60">{rec.desc}</p>
                       </div>
                       <div className="text-[10px] font-mono text-soft-sage">{rec.inhale}-{rec.hold}-{rec.exhale}-{rec.holdPost}</div>
@@ -144,18 +153,20 @@ export default function OnboardingModal({ onComplete }: OnboardingModalProps) {
                 animate={{ opacity: 1, x: 0 }}
                 exit={{ opacity: 0, x: -20 }}
                 transition={{ duration: 0.2 }}
-                className="space-y-6 text-center"
+                className="flex flex-col gap-5 items-center text-center"
               >
-                <div className="w-24 h-24 bg-soft-sage/10 rounded-[40px] flex items-center justify-center text-soft-sage mx-auto mb-8">
-                  <CheckCircle2 className="w-12 h-12" />
+                <div className="w-20 h-20 bg-soft-sage/10 rounded-[40px] flex items-center justify-center text-soft-sage">
+                  <CheckCircle2 className="w-10 h-10" />
                 </div>
-                <h2 className="text-3xl font-serif text-deep-forest">All Set!</h2>
-                <p className="text-accent-green opacity-70">Your personalized Serenity experience is ready. You can always change these settings in your profile.</p>
-                
-                <Card className="border border-cream shadow-none bg-white rounded-3xl p-6 text-left">
-                  <div className="space-y-4">
+                <div>
+                  <h2 className="text-2xl sm:text-3xl font-serif text-deep-forest mb-2">All Set!</h2>
+                  <p className="text-accent-green opacity-70 text-sm leading-relaxed">Your personalized Serenity experience is ready. You can always change these settings in your profile.</p>
+                </div>
+
+                <Card className="border border-cream shadow-none bg-white rounded-3xl p-5 text-left w-full">
+                  <div className="space-y-3">
                     <div className="flex justify-between items-center">
-                      <span className="text-xs text-accent-green opacity-60">Reminder</span>
+                      <span className="text-xs text-accent-green opacity-60">Daily Reminder</span>
                       <span className="font-bold text-deep-forest">{reminderTime}</span>
                     </div>
                     <div className="flex justify-between items-center">
@@ -168,9 +179,10 @@ export default function OnboardingModal({ onComplete }: OnboardingModalProps) {
             )}
           </AnimatePresence>
 
-          <Button 
-            onClick={handleNext} 
-            className="w-full h-14 rounded-full bg-accent-green text-white font-bold mt-12 shadow-lg shadow-accent-green/20"
+          {/* CTA Button */}
+          <Button
+            onClick={handleNext}
+            className="w-full h-13 rounded-full bg-accent-green text-white font-bold shadow-lg shadow-accent-green/20 mt-2"
           >
             {step === 3 ? 'Get Started' : 'Continue'}
             {step < 3 && <ChevronRight className="w-4 h-4 ml-2" />}

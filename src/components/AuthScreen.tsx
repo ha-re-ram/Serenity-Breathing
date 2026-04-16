@@ -1,4 +1,4 @@
-import { useState, useEffect, FormEvent } from 'react';
+import { useState, FormEvent } from 'react';
 import { motion } from 'motion/react';
 import { Mail, Lock, User, LogIn, UserPlus, ChevronLeft, Wifi, WifiOff, CheckCircle2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -12,8 +12,8 @@ import {
   sendPasswordResetEmail, 
   updateProfile,
 } from 'firebase/auth';
-import { auth, db } from '../firebase';
-import { doc, getDocFromServer } from 'firebase/firestore';
+import { auth } from '../firebase';
+
 
 interface AuthScreenProps {
   onGoogleLogin: () => void;
@@ -26,10 +26,7 @@ export default function AuthScreen({ onGoogleLogin }: AuthScreenProps) {
   const [isResetting, setIsResetting] = useState(false);
   const [loading, setLoading] = useState(false);
 
-  useEffect(() => {
-    // Silent background connection check
-    getDocFromServer(doc(db, '_connection_test_', 'ping')).catch(() => {});
-  }, []);
+
 
   const handleSignUp = async (e: FormEvent) => {
     e.preventDefault();
@@ -102,6 +99,28 @@ export default function AuthScreen({ onGoogleLogin }: AuthScreenProps) {
     }
   };
 
+  if (!auth) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-screen bg-bg-page p-8 text-center">
+        <div className="w-16 h-16 bg-rose-50 text-rose-500 rounded-3xl flex items-center justify-center mb-6">
+          <WifiOff className="w-8 h-8" />
+        </div>
+        <h2 className="text-2xl font-serif text-deep-forest mb-2">Connection Error</h2>
+        <p className="text-accent-green opacity-70 max-w-xs mb-8">
+          The application could not connect to the backend. This is usually due to missing environment variables.
+        </p>
+        <div className="bg-white p-6 rounded-[32px] border border-cream shadow-sm text-left w-full max-w-sm">
+          <p className="text-xs font-bold text-accent-green uppercase tracking-widest mb-4 opacity-50">How to Fix</p>
+          <ul className="space-y-3 text-sm text-deep-forest">
+            <li className="flex gap-3"><CheckCircle2 className="w-4 h-4 text-soft-sage flex-shrink-0" /> <span>Create a <b>.env</b> file in the root</span></li>
+            <li className="flex gap-3"><CheckCircle2 className="w-4 h-4 text-soft-sage flex-shrink-0" /> <span>Add your <b>Firebase Keys</b> to it</span></li>
+            <li className="flex gap-3"><CheckCircle2 className="w-4 h-4 text-soft-sage flex-shrink-0" /> <span>Restart the <b>dev server</b></span></li>
+          </ul>
+        </div>
+      </div>
+    );
+  }
+
   if (isResetting) {
     return (
       <div className="flex flex-col items-center justify-center min-h-screen bg-bg-page p-8">
@@ -136,13 +155,17 @@ export default function AuthScreen({ onGoogleLogin }: AuthScreenProps) {
   }
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-bg-page p-8">
-      <div className="w-full max-w-md flex flex-col items-center text-center">
-        <div className="w-20 h-20 bg-white rounded-[40px] flex items-center justify-center mb-6 border border-cream shadow-sm">
-          <div className="w-10 h-10 bg-accent-green rounded-full animate-pulse" />
+    <div className="flex flex-col items-center justify-center min-h-screen bg-bg-page p-6">
+      <div className="w-full max-w-md flex flex-col items-center">
+        <div className="flex items-center gap-4 mb-8">
+          <div className="w-10 h-10 bg-white rounded-2xl flex items-center justify-center border border-cream shadow-sm">
+            <div className="w-4 h-4 bg-accent-green rounded-full animate-pulse" />
+          </div>
+          <div className="text-left">
+            <h1 className="text-xl font-serif text-deep-forest">Serenity</h1>
+            <p className="text-[10px] font-bold text-accent-green uppercase tracking-[2px] opacity-50">Find your calm</p>
+          </div>
         </div>
-        <h1 className="text-4xl font-serif text-deep-forest mb-2">Serenity</h1>
-        <p className="text-accent-green mb-12 opacity-70">Find your calm, anywhere.</p>
 
         <Tabs defaultValue="login" className="w-full">
         <TabsList className="grid w-full grid-cols-2 mb-8 bg-cream/20 rounded-full p-1">

@@ -1,6 +1,7 @@
 import { initializeApp } from 'firebase/app';
 import { getAuth } from 'firebase/auth';
-import { getFirestore, doc, getDocFromServer } from 'firebase/firestore';
+import { getFirestore } from 'firebase/firestore';
+import { getAnalytics, isSupported } from 'firebase/analytics';
 const firebaseConfig = {
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
   authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
@@ -12,30 +13,21 @@ const firebaseConfig = {
   firestoreDatabaseId: import.meta.env.VITE_FIREBASE_DATABASE_ID || '(default)'
 };
 
-const app = initializeApp(firebaseConfig);
-// Use the provided database ID or default to '(default)'
-export const db = getFirestore(app, firebaseConfig.firestoreDatabaseId);
-export const auth = getAuth(app);
+// Check if config is present (prevents crash if .env is missing)
+const isConfigValid = !!firebaseConfig.apiKey;
 
-// Test connection to Firestore
-async function testConnection() {
-  try {
-    // Try to fetch a non-existent document to trigger a server check
-    await getDocFromServer(doc(db, '_connection_test_', 'ping'));
-    console.log("✅ Firestore connection successful");
-  } catch (error: any) {
-    console.error("❌ Firestore Connection Error:", error.code, error.message);
-    
-    if (error.message.includes('the client is offline')) {
-      console.error("SUGGESTION: Firestore cannot reach the server. This often means the 'Firestore Database' has not been created in your Firebase Console yet.");
-    } else if (error.code === 'permission-denied') {
-      console.log("Note: Permission denied is actually a good sign! It means we reached the server but were blocked by rules (which is expected for this test).");
-    } else {
-      console.error("SUGGESTION: Check if your Project ID and API Key in your environment variables are correct.");
-    }
-  }
+if (!isConfigValid) {
+  console.error("❌ Firebase Config Missing: Please create a .env file with your Firebase credentials.");
 }
-testConnection();
+
+const app = isConfigValid ? initializeApp(firebaseConfig) : null;
+
+// Export services safely
+export const db = app ? getFirestore(app, firebaseConfig.firestoreDatabaseId) : (null as any);
+export const auth = app ? getAuth(app) : (null as any);
+export const analytics = app ? isSupported().then(yes => yes ? getAnalytics(app) : null) : Promise.resolve(null);
+
+// Connection test is no longer run automatically on module load to prevent startup latency.
 
 export enum OperationType {
   CREATE = 'create',
@@ -83,7 +75,7 @@ export function handleFirestoreError(error: unknown, operationType: OperationTyp
     },
     operationType,
     path
-  }
-  console.error('Firestore Error: ', JSON.stringify(errInfo));
-  throw new Error(JSON.stringify(errInfo));
+  };
+  // Log the error for debugging but do NOT re-throw — callers handle their own UX.
+  console.error('Firestore Error:', JSON.stringify(errInfo, null, 2));
 }
