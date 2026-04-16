@@ -3,7 +3,7 @@
 
 **Serenity Breathing** is a premium, high-performance mindfulness application designed by [Hareram Kushwaha](https://hareramkushwaha.com.np). It combines scientifically-backed breathing techniques with advanced health tracking and optimistic UI loading for a lag-free experience.
 
-[![Version](https://img.shields.io/badge/Version-1.2.0-soft--sage.svg?color=5A5A40)](https://github.com/ha-re-ram/Serenity-Breathing/releases)
+[![Version](https://img.shields.io/badge/Version-1.2.0-soft--sage.svg?color=5A5A40)](https://github.com/ha-re-ram/Serenity-Mindfulness/releases)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![React](https://img.shields.io/badge/React-19-61DAFB.svg)](https://react.dev/)
 [![Tailwind CSS](https://img.shields.io/badge/Tailwind-4.0-38B2AC.svg)](https://tailwindcss.com/)
