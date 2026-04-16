@@ -124,34 +124,8 @@ export default function App() {
     };
   }, [user]);
 
-  const handleLogin = useCallback(async () => {
-    try {
-      const provider = new GoogleAuthProvider();
-      // Check for mobile user agent
-      const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
-      
-      if (isMobile) {
-        const { signInWithRedirect } = await import('firebase/auth');
-        await signInWithRedirect(auth, provider);
-      } else {
-        await signInWithPopup(auth, provider);
-        toast.success('Welcome back!');
-      }
-    } catch (error: any) {
-      console.error('Login error:', error);
-      if (error.code === 'auth/popup-closed-by-user') {
-        toast.info('Login cancelled.');
-      } else if (error.code === 'auth/popup-blocked') {
-        toast.error('Popup blocked! Try using a different browser or allow popups.');
-      } else if (error.code === 'auth/unauthorized-domain') {
-        toast.error('Domain not authorized! Please add the current domain to Firebase Console > Auth > Authorized Domains.', { duration: 6000 });
-      } else if (error.message.includes('request action is invalid') || error.code === 'auth/internal-error') {
-        toast.error('Auth Error: This usually means the domain is not whitelisted in Firebase Auth Settings or the browser is blocking it.', { duration: 6000 });
-      } else {
-        toast.error('Login failed: ' + error.message);
-      }
-    }
-  }, []);
+  // Google Login removed at user request for simpler Email/Password flow
+
 
 
   const handleLogout = useCallback(() => auth.signOut(), []);
@@ -351,7 +325,7 @@ export default function App() {
     return (
       <>
         <Toaster position="top-center" richColors />
-        <AuthScreen onGoogleLogin={handleLogin} />
+        <AuthScreen />
       </>
     );
   }
