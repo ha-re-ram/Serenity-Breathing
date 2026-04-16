@@ -60,11 +60,12 @@ export default function App() {
 
     const unsubscribe = onAuthStateChanged(auth, (u) => {
       setUser(u);
-      setLoading(false); // Optimistic: Show the UI immediately once user is known
       if (!u) {
+        setLoading(false); // No user, show login screen immediately
         setProfile(null);
         setSessions([]);
       }
+      // If there IS a user, we stay in loading state until the profile listener (below) fires
     });
 
     // Safety fallback if Firebase doesn't respond in 3s
@@ -126,20 +127,32 @@ export default function App() {
   const handleLogin = useCallback(async () => {
     try {
       const provider = new GoogleAuthProvider();
-      await signInWithPopup(auth, provider);
-      toast.success('Welcome back!');
+      // Check for mobile user agent
+      const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+      
+      if (isMobile) {
+        const { signInWithRedirect } = await import('firebase/auth');
+        await signInWithRedirect(auth, provider);
+      } else {
+        await signInWithPopup(auth, provider);
+        toast.success('Welcome back!');
+      }
     } catch (error: any) {
+      console.error('Login error:', error);
       if (error.code === 'auth/popup-closed-by-user') {
         toast.info('Login cancelled.');
       } else if (error.code === 'auth/popup-blocked') {
-        toast.error('Popup blocked! Allow popups for this site to sign in with Google.');
+        toast.error('Popup blocked! Try using a different browser or allow popups.');
       } else if (error.code === 'auth/unauthorized-domain') {
-        toast.error('Domain not authorized for Google Sign-In.');
+        toast.error('Domain not authorized! Please add the current domain to Firebase Console > Auth > Authorized Domains.', { duration: 6000 });
+      } else if (error.message.includes('request action is invalid') || error.code === 'auth/internal-error') {
+        toast.error('Auth Error: This usually means the domain is not whitelisted in Firebase Auth Settings or the browser is blocking it.', { duration: 6000 });
       } else {
         toast.error('Login failed: ' + error.message);
       }
     }
   }, []);
+
 
   const handleLogout = useCallback(() => auth.signOut(), []);
 
