@@ -311,12 +311,10 @@ export default function App() {
   if (loading) {
     return (
       <div className="flex flex-col items-center justify-center h-screen bg-bg-page gap-4">
-        <motion.div
-          animate={{ scale: [1, 1.2, 1], opacity: [0.5, 1, 0.5] }}
-          transition={{ duration: 2, repeat: Infinity }}
-          className="w-16 h-16 bg-soft-sage rounded-full blur-xl"
-        />
-        <p className="text-xs font-bold text-accent-green uppercase tracking-widest animate-pulse">Loading Serenity...</p>
+        <div className="w-12 h-12 bg-accent-green rounded-2xl flex items-center justify-center shadow-lg shadow-accent-green/10">
+          <div className="w-4 h-4 bg-white rounded-full" />
+        </div>
+        <p className="text-xs font-bold text-accent-green uppercase tracking-widest opacity-60">Serenity</p>
       </div>
     );
   }
@@ -373,13 +371,7 @@ export default function App() {
         <main className="flex-1 p-6 lg:p-12 pb-24 lg:pb-12 overflow-y-auto">
           <AnimatePresence mode="wait">
             {activeTab === 'home' && (
-              <motion.div
-                key="home"
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -10 }}
-                className="max-w-2xl mx-auto"
-              >
+              <div className="max-w-2xl mx-auto">
                 <HomeScreen
                   userProfile={profile}
                   onStart={startSession}
@@ -388,16 +380,11 @@ export default function App() {
                   onDurationChange={setSelectedDuration}
                   selectedDuration={selectedDuration}
                 />
-              </motion.div>
+              </div>
             )}
+
             {activeTab === 'progress' && (
-              <motion.div
-                key="progress"
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -10 }}
-                className="max-w-2xl mx-auto"
-              >
+              <div className="max-w-2xl mx-auto">
                 <ProgressScreen
                   userProfile={profile}
                   sessions={sessions}
@@ -405,20 +392,15 @@ export default function App() {
                   onToggleHabit={handleToggleHabit}
                   onDeleteHabit={handleDeleteHabit}
                 />
-              </motion.div>
+              </div>
             )}
             {activeTab === 'settings' && (
-              <motion.div
-                key="settings"
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -10 }}
-                className="max-w-2xl mx-auto flex flex-col gap-8"
-              >
+              <div className="max-w-2xl mx-auto flex flex-col gap-8">
                 <div className="flex justify-between items-end">
                   <h1 className="text-4xl font-light text-deep-forest">Profile</h1>
                   <p className="text-xs text-accent-green opacity-50 font-bold uppercase tracking-widest">Settings & Account</p>
                 </div>
+
 
                 {/* Profile Card */}
                 <Card className="border border-cream shadow-none bg-card rounded-[32px] overflow-hidden">
@@ -607,7 +589,8 @@ export default function App() {
                     </CardContent>
                   </Card>
                 </div>
-              </motion.div>
+              </div>
+
             )}
           </AnimatePresence>
         </main>

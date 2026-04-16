@@ -1,10 +1,8 @@
 import { useState, FormEvent } from 'react';
-import { motion } from 'motion/react';
 import { Mail, Lock, User, LogIn, UserPlus, ChevronLeft, Wifi, WifiOff, CheckCircle2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { toast } from 'sonner';
 import {
   createUserWithEmailAndPassword,
@@ -14,19 +12,13 @@ import {
 } from 'firebase/auth';
 import { auth } from '../firebase';
 
-
-interface AuthScreenProps {
-  // onGoogleLogin: () => void;
-}
-
-export default function AuthScreen({ }: AuthScreenProps) {
+export default function AuthScreen() {
+  const [isLogin, setIsLogin] = useState(true);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [name, setName] = useState('');
   const [isResetting, setIsResetting] = useState(false);
   const [loading, setLoading] = useState(false);
-
-
 
   const handleSignUp = async (e: FormEvent) => {
     e.preventDefault();
@@ -37,19 +29,9 @@ export default function AuthScreen({ }: AuthScreenProps) {
     try {
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
       await updateProfile(userCredential.user, { displayName: name });
-      toast.success('Welcome to Serenity!', {
-        description: 'Your account has been created successfully.',
-      });
+      toast.success('Welcome to Serenity!');
     } catch (error: any) {
-      if (error.code === 'auth/operation-not-allowed') {
-        toast.error('Registration is currently unavailable', {
-          description: 'Please contact support or try again later.',
-        });
-      } else {
-        toast.error('Could not create account', {
-          description: error.message,
-        });
-      }
+      toast.error('Could not create account: ' + error.message);
     } finally {
       setLoading(false);
     }
@@ -65,15 +47,7 @@ export default function AuthScreen({ }: AuthScreenProps) {
       await signInWithEmailAndPassword(auth, email, password);
       toast.success('Welcome back!');
     } catch (error: any) {
-      if (error.code === 'auth/operation-not-allowed') {
-        toast.error('Login is currently unavailable', {
-          description: 'Please contact support or try again later.',
-        });
-      } else {
-        toast.error('Login failed', {
-          description: error.message,
-        });
-      }
+      toast.error('Login failed: ' + error.message);
     } finally {
       setLoading(false);
     }
@@ -81,19 +55,14 @@ export default function AuthScreen({ }: AuthScreenProps) {
 
   const handleResetPassword = async (e: FormEvent) => {
     e.preventDefault();
-    if (!email) return toast.error('Please enter your email address first.');
+    if (!email) return toast.error('Please enter your email.');
     setLoading(true);
     try {
       await sendPasswordResetEmail(auth, email);
-      toast.success('Reset link sent! Please check your inbox.', {
-        description: 'If you don\'t see it, check your spam folder.',
-      });
+      toast.success('Reset link sent!');
       setIsResetting(false);
     } catch (error: any) {
-      console.error("Reset Error:", error.message || error);
-      toast.error('Could not send reset link', {
-        description: error.message,
-      });
+      toast.error('Reset failed: ' + error.message);
     } finally {
       setLoading(false);
     }
@@ -101,163 +70,139 @@ export default function AuthScreen({ }: AuthScreenProps) {
 
   if (!auth) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-screen bg-bg-page p-8 text-center">
-        <div className="w-16 h-16 bg-rose-50 text-rose-500 rounded-3xl flex items-center justify-center mb-6">
-          <WifiOff className="w-8 h-8" />
-        </div>
-        <h2 className="text-2xl font-serif text-deep-forest mb-2">Connection Error</h2>
-        <p className="text-accent-green opacity-70 max-w-xs mb-8">
-          The application could not connect to the backend. This is usually due to missing environment variables.
-        </p>
-        <div className="bg-white p-6 rounded-[32px] border border-cream shadow-sm text-left w-full max-w-sm">
-          <p className="text-xs font-bold text-accent-green uppercase tracking-widest mb-4 opacity-50">How to Fix</p>
-          <ul className="space-y-3 text-sm text-deep-forest">
-            <li className="flex gap-3"><CheckCircle2 className="w-4 h-4 text-soft-sage flex-shrink-0" /> <span>Create a <b>.env</b> file in the root</span></li>
-            <li className="flex gap-3"><CheckCircle2 className="w-4 h-4 text-soft-sage flex-shrink-0" /> <span>Add your <b>Firebase Keys</b> to it</span></li>
-            <li className="flex gap-3"><CheckCircle2 className="w-4 h-4 text-soft-sage flex-shrink-0" /> <span>Restart the <b>dev server</b></span></li>
-          </ul>
-        </div>
-      </div>
-    );
-  }
-
-  if (isResetting) {
-    return (
-      <div className="flex flex-col items-center justify-center min-h-screen bg-bg-page p-8">
-        <div className="w-full max-w-md flex flex-col items-center text-center relative">
-          <button
-            onClick={() => setIsResetting(false)}
-            className="absolute -top-12 left-0 text-accent-green flex items-center gap-2 font-medium"
-          >
-            <ChevronLeft className="w-5 h-5" /> Back
-          </button>
-          <h1 className="text-3xl font-serif text-deep-forest mb-4">Reset Password</h1>
-          <p className="text-accent-green mb-8 opacity-70">Enter your email to receive a reset link.</p>
-          <form onSubmit={handleResetPassword} className="w-full space-y-4">
-            <div className="space-y-2 text-left">
-              <Label htmlFor="reset-email">Email</Label>
-              <Input
-                id="reset-email"
-                type="email"
-                placeholder="name@example.com"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="rounded-xl border-cream"
-              />
-            </div>
-            <Button type="submit" disabled={loading} className="w-full h-12 rounded-full bg-accent-green text-white font-bold shadow-lg shadow-accent-green/20">
-              {loading ? 'Sending link...' : 'Send Reset Link'}
-            </Button>
-          </form>
+      <div className="flex items-center justify-center min-h-screen bg-[#FDFCF8] p-6">
+        <div className="text-center">
+          <WifiOff className="w-12 h-12 text-rose-500 mx-auto mb-4" />
+          <h2 className="text-2xl font-serif text-[#344E41]">Connection Error</h2>
+          <p className="text-[#5A5A40] opacity-70">Please check your Firebase configuration.</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-bg-page p-6">
-      <div className="w-full max-w-md flex flex-col items-center">
-        <div className="flex items-center gap-4 mb-8">
-          <div className="w-10 h-10 bg-white rounded-2xl flex items-center justify-center border border-cream shadow-sm">
-            <div className="w-4 h-4 bg-accent-green rounded-full animate-pulse" />
+    <div className="flex items-center justify-center min-h-screen bg-[#FDFCF8] p-6">
+      <div className="w-full max-w-[400px]">
+        {/* Brand Header */}
+        <div className="text-center mb-10">
+          <div className="w-12 h-12 bg-[#5A5A40] rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg shadow-[#5A5A40]/10">
+            <div className="w-4 h-4 bg-white rounded-full" />
           </div>
-          <div className="text-left">
-            <h1 className="text-xl font-serif text-deep-forest">Serenity</h1>
-            <p className="text-[10px] font-bold text-accent-green uppercase tracking-[2px] opacity-50">Find your calm</p>
-          </div>
+          <h1 className="text-3xl font-serif text-[#344E41] mb-1">Serenity</h1>
+          <p className="text-[10px] font-bold text-[#5A5A40] uppercase tracking-[3px] opacity-40">Mindfulness & Balance</p>
         </div>
 
-        <Tabs defaultValue="login" className="w-full">
-          <TabsList className="grid w-full grid-cols-2 mb-8 bg-cream/20 rounded-full p-1">
-            <TabsTrigger value="login" className="rounded-full data-[state=active]:bg-white data-[state=active]:text-accent-green">Login</TabsTrigger>
-            <TabsTrigger value="signup" className="rounded-full data-[state=active]:bg-white data-[state=active]:text-accent-green">Sign Up</TabsTrigger>
-          </TabsList>
-
-          <TabsContent value="login">
-            <form onSubmit={handleLogin} className="space-y-4">
-              <div className="space-y-2 text-left">
-                <Label htmlFor="email">Email</Label>
-                <Input
-                  id="email"
-                  type="email"
-                  placeholder="name@example.com"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className="rounded-xl border-cream"
-                />
+        {/* Auth Form Card */}
+        <div className="bg-white p-8 rounded-[40px] border border-[#DAD7CD] shadow-sm">
+          {isResetting ? (
+            <div className="space-y-6">
+              <div className="text-center mb-6">
+                <h2 className="text-xl font-serif text-[#344E41]">Reset Password</h2>
+                <p className="text-xs text-[#5A5A40] opacity-60 mt-1">We'll send a recovery link to your email.</p>
               </div>
-              <div className="space-y-2 text-left">
-                <div className="flex justify-between items-center">
-                  <Label htmlFor="password">Password</Label>
-                  <button
-                    type="button"
-                    onClick={() => setIsResetting(true)}
-                    className="text-xs font-bold text-accent-green opacity-60 hover:opacity-100"
-                  >
-                    Forgot?
-                  </button>
+              <form onSubmit={handleResetPassword} className="space-y-4">
+                <div className="space-y-1">
+                  <Label htmlFor="reset-email" className="text-[10px] uppercase tracking-wider opacity-60 ml-1">Email Address</Label>
+                  <Input
+                    id="reset-email"
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    className="h-12 rounded-2xl border-[#DAD7CD] focus:border-[#5A5A40] focus:ring-0"
+                  />
                 </div>
-                <Input
-                  id="password"
-                  type="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  className="rounded-xl border-cream"
-                />
+                <Button type="submit" disabled={loading} className="w-full h-12 rounded-2xl bg-[#5A5A40] hover:bg-[#344E41] text-white font-bold transition-colors">
+                  {loading ? 'Sending...' : 'Send Reset Link'}
+                </Button>
+                <button
+                  type="button"
+                  onClick={() => setIsResetting(false)}
+                  className="w-full text-xs font-bold text-[#5A5A40] opacity-40 hover:opacity-100 transition-opacity"
+                >
+                  Back to Login
+                </button>
+              </form>
+            </div>
+          ) : (
+            <>
+              <div className="text-center mb-8">
+                <h2 className="text-xl font-serif text-[#344E41]">{isLogin ? 'Welcome Back' : 'Create Account'}</h2>
+                <p className="text-xs text-[#5A5A40] opacity-60 mt-1">
+                  {isLogin ? 'Enter your details to find your calm.' : 'Start your mindfulness journey today.'}
+                </p>
               </div>
-              <Button type="submit" disabled={loading} className="w-full h-12 rounded-full bg-accent-green text-white font-bold">
-                {loading ? 'Logging in...' : 'Login'}
-              </Button>
-            </form>
-          </TabsContent>
 
-          <TabsContent value="signup">
-            <form onSubmit={handleSignUp} className="space-y-4">
-              <div className="space-y-2 text-left">
-                <Label htmlFor="name">Full Name</Label>
-                <Input
-                  id="name"
-                  placeholder="Enter your name here.."
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  className="rounded-xl border-cream"
-                />
-              </div>
-              <div className="space-y-2 text-left">
-                <Label htmlFor="signup-email">Email</Label>
-                <Input
-                  id="signup-email"
-                  type="email"
-                  placeholder="name@example.com"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className="rounded-xl border-cream"
-                />
-              </div>
-              <div className="space-y-2 text-left">
-                <Label htmlFor="signup-password">Password</Label>
-                <Input
-                  id="signup-password"
-                  type="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  className="rounded-xl border-cream"
-                />
-              </div>
-              <Button type="submit" disabled={loading} className="w-full h-12 rounded-full bg-accent-green text-white font-bold">
-                {loading ? 'Creating account...' : 'Create Account'}
-              </Button>
-            </form>
-          </TabsContent>
-        </Tabs>
+              <form onSubmit={isLogin ? handleLogin : handleSignUp} className="space-y-4">
+                {!isLogin && (
+                  <div className="space-y-1">
+                    <Label htmlFor="name" className="text-[10px] uppercase tracking-wider opacity-60 ml-1">Full Name</Label>
+                    <Input
+                      id="name"
+                      placeholder="Enter your full name"
+                      value={name}
+                      onChange={(e) => setName(e.target.value)}
+                      className="h-12 rounded-2xl border-[#DAD7CD]"
+                    />
+                  </div>
+                )}
+                <div className="space-y-1">
+                  <Label htmlFor="email" className="text-[10px] uppercase tracking-wider opacity-60 ml-1">Email Address</Label>
+                  <Input
+                    id="email"
+                    type="email"
+                    placeholder="Enter your email address"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    className="h-12 rounded-2xl border-[#DAD7CD]"
+                  />
+                </div>
+                <div className="space-y-1">
+                  <div className="flex justify-between items-center px-1">
+                    <Label htmlFor="password" className="text-[10px] uppercase tracking-wider opacity-60">Password</Label>
+                    {isLogin && (
+                      <button
+                        type="button"
+                        onClick={() => setIsResetting(true)}
+                        className="text-[10px] font-bold text-[#5A5A40] opacity-40 hover:opacity-100"
+                      >
+                        Forgot?
+                      </button>
+                    )}
+                  </div>
+                  <Input
+                    id="password"
+                    type="password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    className="h-12 rounded-2xl border-[#DAD7CD]"
+                  />
+                </div>
+                <Button type="submit" disabled={loading} className="w-full h-12 rounded-2xl bg-[#5A5A40] hover:bg-[#344E41] text-white font-bold transition-colors mt-2">
+                  {loading ? (isLogin ? 'Logging in...' : 'Registering...') : (isLogin ? 'Log In' : 'Sign Up')}
+                </Button>
+              </form>
 
-        <div className="mt-8 text-[10px] text-accent-green opacity-40 text-center leading-relaxed">
-          Securely powered by Firebase Authentication
+              <div className="mt-8 pt-6 border-t border-[#DAD7CD]/30 text-center">
+                <p className="text-xs text-[#5A5A40] opacity-60">
+                  {isLogin ? "Don't have an account?" : "Already have an account?"}
+                  <button
+                    onClick={() => setIsLogin(!isLogin)}
+                    className="ml-2 font-bold text-[#5A5A40] hover:text-[#344E41]"
+                  >
+                    {isLogin ? 'Sign Up' : 'Log In'}
+                  </button>
+                </p>
+              </div>
+            </>
+          )}
         </div>
+
+        {/* Footer */}
+        <p className="mt-8 text-[10px] text-[#5A5A40] opacity-40 text-center uppercase tracking-[2px]">
+          Professional Mindfulness App
+        </p>
       </div>
     </div>
   );
-
-
-
 }
+
