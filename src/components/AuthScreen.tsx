@@ -289,7 +289,7 @@ export default function AuthScreen({ onGoogleLogin }: AuthScreenProps) {
       <p className="mt-8 text-[10px] text-accent-green opacity-40 text-center leading-relaxed">
         Having trouble signing in? Ensure your deployment domain is whitelisted in 
         <br />
-        <span className="font-bold">Firebase Console > Authentication > Settings > Authorized Domains</span>.
+        <span className="font-bold">Firebase Console &gt; Authentication &gt; Settings &gt; Authorized Domains</span>.
       </p>
     </div>
   </div>
