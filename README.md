@@ -1,17 +1,26 @@
 # Serenity Breathing 🌿
 ### *Find your calm, anywhere.*
 
-**Serenity Breathing** is a premium, high-performance mindfulness application designed by [Hareram Kushwaha](https://hareramkushwaha.com.np). It combines scientifically-backed breathing techniques with advanced health tracking to help users reduce stress, optimize focus, and achieve deep relaxation.
+**Serenity Breathing** is a premium, high-performance mindfulness application designed by [Hareram Kushwaha](https://hareramkushwaha.com.np). It combines scientifically-backed breathing techniques with advanced health tracking and optimistic UI loading for a lag-free experience.
 
-[![Version](https://img.shields.io/badge/Version-1.2.0-soft--sage.svg?color=5A5A40)](https://github.com/ha-re-ram/serenity-breathing/releases)
+[![Version](https://img.shields.io/badge/Version-1.2.0-soft--sage.svg?color=5A5A40)](https://github.com/ha-re-ram/Serenity-Breathing/releases)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![React](https://img.shields.io/badge/React-19-61DAFB.svg)](https://react.dev/)
 [![Tailwind CSS](https://img.shields.io/badge/Tailwind-4.0-38B2AC.svg)](https://tailwindcss.com/)
 [![Firebase](https://img.shields.io/badge/Firebase-12-FFCA28.svg)](https://firebase.google.com/)
 
+🔗 **Live Application**: [https://serenity.hareramkushwaha.com.np/](https://serenity.hareramkushwaha.com.np/)
+
 ---
 
-## ✨ Features
+## 📈 Search Optimization (GitHub & SEO)
+
+To make this project renowned and highly visible, add the following **Topics** to your GitHub repository settings:
+`mindfulness`, `meditation-app`, `breathing-exercises`, `wellness-tracking`, `pwa`, `react-19`, `firebase-auth`, `bmi-calculator`, `self-care`, `health-tech`.
+
+---
+
+## ✨ Features (Mobile-First Optimization)
 
 - **🎯 Guided Breathing Patterns**: 
   - **Calm**: 4-4 rhythm for instant relaxation.

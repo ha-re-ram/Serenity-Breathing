@@ -60,10 +60,10 @@ export default function App() {
 
     const unsubscribe = onAuthStateChanged(auth, (u) => {
       setUser(u);
+      setLoading(false); // Optimistic: Show the UI immediately once user is known
       if (!u) {
         setProfile(null);
         setSessions([]);
-        setLoading(false);
       }
     });
 
