@@ -6,10 +6,10 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { toast } from 'sonner';
-import { 
-  createUserWithEmailAndPassword, 
-  signInWithEmailAndPassword, 
-  sendPasswordResetEmail, 
+import {
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
+  sendPasswordResetEmail,
   updateProfile,
 } from 'firebase/auth';
 import { auth } from '../firebase';
@@ -125,7 +125,7 @@ export default function AuthScreen({ }: AuthScreenProps) {
     return (
       <div className="flex flex-col items-center justify-center min-h-screen bg-bg-page p-8">
         <div className="w-full max-w-md flex flex-col items-center text-center relative">
-          <button 
+          <button
             onClick={() => setIsResetting(false)}
             className="absolute -top-12 left-0 text-accent-green flex items-center gap-2 font-medium"
           >
@@ -136,11 +136,11 @@ export default function AuthScreen({ }: AuthScreenProps) {
           <form onSubmit={handleResetPassword} className="w-full space-y-4">
             <div className="space-y-2 text-left">
               <Label htmlFor="reset-email">Email</Label>
-              <Input 
-                id="reset-email" 
-                type="email" 
-                placeholder="name@example.com" 
-                value={email} 
+              <Input
+                id="reset-email"
+                type="email"
+                placeholder="name@example.com"
+                value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 className="rounded-xl border-cream"
               />
@@ -168,95 +168,95 @@ export default function AuthScreen({ }: AuthScreenProps) {
         </div>
 
         <Tabs defaultValue="login" className="w-full">
-        <TabsList className="grid w-full grid-cols-2 mb-8 bg-cream/20 rounded-full p-1">
-          <TabsTrigger value="login" className="rounded-full data-[state=active]:bg-white data-[state=active]:text-accent-green">Login</TabsTrigger>
-          <TabsTrigger value="signup" className="rounded-full data-[state=active]:bg-white data-[state=active]:text-accent-green">Sign Up</TabsTrigger>
-        </TabsList>
+          <TabsList className="grid w-full grid-cols-2 mb-8 bg-cream/20 rounded-full p-1">
+            <TabsTrigger value="login" className="rounded-full data-[state=active]:bg-white data-[state=active]:text-accent-green">Login</TabsTrigger>
+            <TabsTrigger value="signup" className="rounded-full data-[state=active]:bg-white data-[state=active]:text-accent-green">Sign Up</TabsTrigger>
+          </TabsList>
 
-        <TabsContent value="login">
-          <form onSubmit={handleLogin} className="space-y-4">
-            <div className="space-y-2 text-left">
-              <Label htmlFor="email">Email</Label>
-              <Input 
-                id="email" 
-                type="email" 
-                placeholder="name@example.com" 
-                value={email} 
-                onChange={(e) => setEmail(e.target.value)}
-                className="rounded-xl border-cream"
-              />
-            </div>
-            <div className="space-y-2 text-left">
-              <div className="flex justify-between items-center">
-                <Label htmlFor="password">Password</Label>
-                <button 
-                  type="button" 
-                  onClick={() => setIsResetting(true)}
-                  className="text-xs font-bold text-accent-green opacity-60 hover:opacity-100"
-                >
-                  Forgot?
-                </button>
+          <TabsContent value="login">
+            <form onSubmit={handleLogin} className="space-y-4">
+              <div className="space-y-2 text-left">
+                <Label htmlFor="email">Email</Label>
+                <Input
+                  id="email"
+                  type="email"
+                  placeholder="name@example.com"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  className="rounded-xl border-cream"
+                />
               </div>
-              <Input 
-                id="password" 
-                type="password" 
-                value={password} 
-                onChange={(e) => setPassword(e.target.value)}
-                className="rounded-xl border-cream"
-              />
-            </div>
-            <Button type="submit" disabled={loading} className="w-full h-12 rounded-full bg-accent-green text-white font-bold">
-              {loading ? 'Logging in...' : 'Login'}
-            </Button>
-          </form>
-        </TabsContent>
+              <div className="space-y-2 text-left">
+                <div className="flex justify-between items-center">
+                  <Label htmlFor="password">Password</Label>
+                  <button
+                    type="button"
+                    onClick={() => setIsResetting(true)}
+                    className="text-xs font-bold text-accent-green opacity-60 hover:opacity-100"
+                  >
+                    Forgot?
+                  </button>
+                </div>
+                <Input
+                  id="password"
+                  type="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className="rounded-xl border-cream"
+                />
+              </div>
+              <Button type="submit" disabled={loading} className="w-full h-12 rounded-full bg-accent-green text-white font-bold">
+                {loading ? 'Logging in...' : 'Login'}
+              </Button>
+            </form>
+          </TabsContent>
 
-        <TabsContent value="signup">
-          <form onSubmit={handleSignUp} className="space-y-4">
-            <div className="space-y-2 text-left">
-              <Label htmlFor="name">Full Name</Label>
-              <Input 
-                id="name" 
-                placeholder="John Doe" 
-                value={name} 
-                onChange={(e) => setName(e.target.value)}
-                className="rounded-xl border-cream"
-              />
-            </div>
-            <div className="space-y-2 text-left">
-              <Label htmlFor="signup-email">Email</Label>
-              <Input 
-                id="signup-email" 
-                type="email" 
-                placeholder="name@example.com" 
-                value={email} 
-                onChange={(e) => setEmail(e.target.value)}
-                className="rounded-xl border-cream"
-              />
-            </div>
-            <div className="space-y-2 text-left">
-              <Label htmlFor="signup-password">Password</Label>
-              <Input 
-                id="signup-password" 
-                type="password" 
-                value={password} 
-                onChange={(e) => setPassword(e.target.value)}
-                className="rounded-xl border-cream"
-              />
-            </div>
-            <Button type="submit" disabled={loading} className="w-full h-12 rounded-full bg-accent-green text-white font-bold">
-              {loading ? 'Creating account...' : 'Create Account'}
-            </Button>
-          </form>
-        </TabsContent>
-      </Tabs>
+          <TabsContent value="signup">
+            <form onSubmit={handleSignUp} className="space-y-4">
+              <div className="space-y-2 text-left">
+                <Label htmlFor="name">Full Name</Label>
+                <Input
+                  id="name"
+                  placeholder="Enter your name here.."
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  className="rounded-xl border-cream"
+                />
+              </div>
+              <div className="space-y-2 text-left">
+                <Label htmlFor="signup-email">Email</Label>
+                <Input
+                  id="signup-email"
+                  type="email"
+                  placeholder="name@example.com"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  className="rounded-xl border-cream"
+                />
+              </div>
+              <div className="space-y-2 text-left">
+                <Label htmlFor="signup-password">Password</Label>
+                <Input
+                  id="signup-password"
+                  type="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className="rounded-xl border-cream"
+                />
+              </div>
+              <Button type="submit" disabled={loading} className="w-full h-12 rounded-full bg-accent-green text-white font-bold">
+                {loading ? 'Creating account...' : 'Create Account'}
+              </Button>
+            </form>
+          </TabsContent>
+        </Tabs>
 
-      <div className="mt-8 text-[10px] text-accent-green opacity-40 text-center leading-relaxed">
-        Securely powered by Firebase Authentication
+        <div className="mt-8 text-[10px] text-accent-green opacity-40 text-center leading-relaxed">
+          Securely powered by Firebase Authentication
+        </div>
       </div>
     </div>
-  </div>
-);
+  );
 
 
 
