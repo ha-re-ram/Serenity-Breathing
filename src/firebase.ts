@@ -13,12 +13,16 @@ const firebaseConfig = {
   firestoreDatabaseId: import.meta.env.VITE_FIREBASE_DATABASE_ID || '(default)'
 };
 
-// Check if config is present (prevents crash if .env is missing)
-const isConfigValid = !!firebaseConfig.apiKey;
+// Check if config is present and properly substituted
+const isConfigValid = !!firebaseConfig.apiKey && 
+                      !!firebaseConfig.projectId && 
+                      firebaseConfig.projectId !== 'VITE_FIREBASE_PROJECT_ID';
 
 if (!isConfigValid) {
-  console.error("❌ Firebase Config Missing: Please create a .env file with your Firebase credentials.");
+  console.error("❌ Firebase Config Error: Environment variables are missing or were not substituted during build.");
+  console.log("Current Project ID:", firebaseConfig.projectId);
 }
+
 
 const app = isConfigValid ? initializeApp(firebaseConfig) : null;
 
