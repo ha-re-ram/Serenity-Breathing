@@ -30,13 +30,16 @@
 
 ---
 
-## 🛠️ Architecture
+## 🛠️ Architecture & Documentation
 
 - **Frontend Core**: [React 19](https://react.dev/) / [Vite](https://vitejs.dev/)
 - **Styling**: [Tailwind CSS 4.0](https://tailwindcss.com/)
 - **Core Logic**: Optimized `useRef` based timer engine for sub-millisecond precision.
 - **Backend Services**: [Firebase](https://firebase.google.com/) (Production Suite)
 - **Fluid Motion**: [Motion (Framer)](https://motion.dev/)
+
+📖 **Comprehensive Developer & Architecture Guide**: See [PROJECT_GUIDE.md](file:///home/ha-re-ram/Codes/Serenity-Breathing/PROJECT_GUIDE.md) for full system design, database schemas, critical implementation gotchas, step-by-step modification playbooks, and the living change log.
+
 
 ---
 
