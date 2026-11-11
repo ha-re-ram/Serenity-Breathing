@@ -34,6 +34,7 @@ import ProgressScreen from './components/ProgressScreen';
 import AuthScreen from './components/AuthScreen';
 import OnboardingModal from './components/OnboardingModal';
 import { isSameDay, subDays } from 'date-fns';
+import { toggleHabitCompletion } from './machines/habitMachine';
 
 export default function App() {
   const [user, setUser] = useState<FirebaseUser | null>(null);
@@ -205,11 +206,7 @@ export default function App() {
     const now = new Date();
     const updatedHabits = profile.habits.map(h => {
       if (h.id !== habitId) return h;
-      const lastDate = h.lastCompletedDate ? new Date(h.lastCompletedDate) : null;
-      if (lastDate && isSameDay(lastDate, now)) return h; // Already done today
-
-      const newStreak = (lastDate && isSameDay(lastDate, subDays(now, 1))) ? h.streak + 1 : 1;
-      return { ...h, streak: newStreak, lastCompletedDate: now.toISOString() };
+      return toggleHabitCompletion(h, now);
     });
     try {
       await updateDoc(doc(db, 'users', user.uid), { habits: updatedHabits });
@@ -627,6 +624,7 @@ export default function App() {
             <SessionScreen
               mode={activeSession}
               customConfig={profile?.customBreathingConfig}
+              targetDurationMinutes={selectedDuration}
               onEnd={endSession}
               onCancel={() => setActiveSession(null)}
             />

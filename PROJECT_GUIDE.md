@@ -82,6 +82,13 @@
 - [src/index.css](file:///home/ha-re-ram/Codes/Serenity-Breathing/src/index.css) — Tailwind CSS v4 `@theme`, brand colors, dark mode tokens
 - [src/main.tsx](file:///home/ha-re-ram/Codes/Serenity-Breathing/src/main.tsx) — React DOM root render with ThemeProvider & Toaster
 - [src/types.ts](file:///home/ha-re-ram/Codes/Serenity-Breathing/src/types.ts) — TypeScript interfaces: `BreathingConfig`, `UserProfile`, `Habit`, `SessionRecord`
+- [src/machines/](file:///home/ha-re-ram/Codes/Serenity-Breathing/src/machines/) — Explicit, type-safe finite state machines and reducers:
+  - `breathingSessionMachine.ts` — Breathwork session lifecycle (`preparing` -> `breathing` -> `paused` -> `reflecting` -> `completed`), accurate progress, pause/resume, deduplicated haptics
+  - `authFormMachine.ts` — Authentication mode transitions (`signIn` | `signUp` | `forgotPassword`) and submission state
+  - `onboardingMachine.ts` — 3-step onboarding wizard with bidirectional navigation (`reminder` <-> `rhythm` <-> `summary`)
+  - `habitMachine.ts` — Pure habit evaluation (`completed_today` | `due` | `missed`) and streak progression
+  - `debouncedSyncMachine.ts` — Optimistic local updates with debounced remote persistence (`idle` | `debouncing` | `saving` | `error`)
+  - `machines.test.ts` — Native Node/TSX unit test suite for state machines
 - [src/constants/quotes.ts](file:///home/ha-re-ram/Codes/Serenity-Breathing/src/constants/quotes.ts) — Curated list of mindfulness quotes & random picker
 - [src/components/AuthScreen.tsx](file:///home/ha-re-ram/Codes/Serenity-Breathing/src/components/AuthScreen.tsx) — Login, Registration & Password Reset screen
 - [src/components/BreathingCircle.tsx](file:///home/ha-re-ram/Codes/Serenity-Breathing/src/components/BreathingCircle.tsx) — Animated SVG/Framer circle with phase dilation & haptics
@@ -308,6 +315,14 @@ The project uses **Tailwind CSS v4** with a custom color palette tailored for ca
 ### 9.4 Tailwind CSS v4 Migration Nuance
 **Notice**: This repository uses Tailwind CSS 4.0 (`@tailwindcss/vite`). It does **NOT** use `tailwind.config.js`. All design tokens, custom colors, and `@theme` directives are placed directly inside `src/index.css`.
 
+### 9.5 Explicit State Machine Architecture (UX, DX, AX Elevation)
+All core interactive flows that previously relied on implicit, scattered boolean flags (`isActive`, `isLogin`, `isResetting`, `showMoodAfter`, magic step numbers) are now formalized into pure, type-safe finite state machines located under `src/machines/`:
+1. **Breathwork Session Machine**: Manages preparation countdown, cyclic phase advancement, pause/resume, accurate progress calculation against target duration, deduplicated haptics, and completion reflection.
+2. **Auth Form Machine**: Eliminates invalid states (`isLogin: false, isResetting: true`) via a discriminated union (`signIn | signUp | forgotPassword`) with automatic error clearing on input.
+3. **Onboarding Machine**: Provides explicit wizard stages with back-navigation support and preset clamping.
+4. **Habit Machine**: Pure evaluation of habit streak progression (`completed_today | due | missed`), shared by both App orchestrator and Progress dashboard.
+5. **Debounced Sync Machine**: Formalizes optimistic local updates and network debouncing with visible sync states.
+
 ---
 
 ## 10. Developer Playbooks (How to Make Changes)
@@ -380,6 +395,7 @@ npm run dev      # Starts Vite development server on port 3000 (host: 0.0.0.0)
 npm run build    # Runs Vite production build outputting to dist/
 npm run preview  # Previews production build locally
 npm run lint     # Runs TypeScript typecheck (tsc --noEmit)
+npm test         # Runs native TSX state machine unit test suite
 npm run clean    # Removes dist folder
 ```
 
@@ -397,6 +413,7 @@ npm run clean    # Removes dist folder
 
 | Date (YYYY-MM-DD) | Author / Agent | Changes Made | Files Affected |
 |---|---|---|---|
+| **2026-11-11** | Antigravity AI | Formalized all implicit state machines into type-safe, pure state machines under `src/machines/` (`breathingSessionMachine`, `authFormMachine`, `onboardingMachine`, `habitMachine`, `debouncedSyncMachine`). Elevates UX (warmup countdown, session pause/resume, accurate target duration progress, back-step onboarding, deduplicated haptics), DX (strict TypeScript discriminated unions, pure reducers, zero impossible states), and AX (self-documenting transition graphs, automated test suite). Added `npm test` script. | `src/machines/*`, `src/components/SessionScreen.tsx`, `src/components/BreathingCircle.tsx`, `src/components/AuthScreen.tsx`, `src/components/OnboardingModal.tsx`, `src/components/ProgressScreen.tsx`, `src/App.tsx`, `package.json`, `PROJECT_GUIDE.md` |
 | **2026-09-16** | Antigravity AI | Created comprehensive master project guide & architecture reference (`PROJECT_GUIDE.md`) to serve as the permanent living knowledge base for all future updates and refactors. | `PROJECT_GUIDE.md`, `README.md` |
 
 ---

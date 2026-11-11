@@ -6,6 +6,7 @@ import { Input } from '@/components/ui/input';
 import { UserProfile, SessionRecord } from '../types';
 import { format, subDays, isSameDay } from 'date-fns';
 import { useState } from 'react';
+import { evaluateHabit } from '../machines/habitMachine';
 
 interface ProgressScreenProps {
   userProfile: UserProfile | null;
@@ -246,8 +247,8 @@ export default function ProgressScreen({
             </p>
           ) : (
             userProfile.habits.map((habit) => {
-              const lastDate = habit.lastCompletedDate ? new Date(habit.lastCompletedDate) : null;
-              const isCompletedToday = lastDate && isSameDay(lastDate, new Date());
+              const evaluation = evaluateHabit(habit);
+              const isCompletedToday = evaluation.isCompletedToday;
               
               return (
                 <motion.div
