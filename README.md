@@ -82,8 +82,7 @@ npm run preview   # Preview production build locally
 - 🌐 [Official Portfolio](https://hareramkushwaha.com.np)
 - 🐙 [GitHub](https://github.com/ha-re-ram)
 - 💼 [LinkedIn](https://www.linkedin.com/in/ha-re-ram)
-- ✉️ [Email](mailto:23cs054@gmail.com)
-- 💬 [Secondary Contact](mailto:hareramkushwaha054@gmail.com)
+- ✉️ [Contact](mailto:hareramkushwaha054@gmail.com)
 
 ---
 
