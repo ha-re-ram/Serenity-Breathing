@@ -1,10 +1,25 @@
+import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { X, Pause, Play, Sparkles, CheckCircle2 } from 'lucide-react';
+import {
+  X,
+  Pause,
+  Play,
+  Sparkles,
+  CheckCircle2,
+  Volume2,
+  VolumeX,
+  Music,
+  Sliders,
+  Check,
+} from 'lucide-react';
 import { BreathingMode } from '../types';
 import BreathingCircle from './BreathingCircle';
 import { Button } from '@/components/ui/button';
+import { Slider } from '@/components/ui/slider';
 import MoodCheck from './MoodCheck';
 import { useBreathingSessionMachine, SessionPhase } from '../machines/breathingSessionMachine';
+import { useSoundMachine } from '../machines/soundMachine';
+import { AmbientSoundType } from '../services/audioEngine';
 
 export interface SessionScreenProps {
   mode: BreathingMode;
@@ -21,6 +36,8 @@ export default function SessionScreen({
   onEnd,
   onCancel,
 }: SessionScreenProps) {
+  const [showSoundModal, setShowSoundModal] = useState(false);
+
   const {
     state,
     config,
@@ -39,10 +56,56 @@ export default function SessionScreen({
     enableWarmup: true,
   });
 
+  const {
+    isMuted,
+    voiceEnabled,
+    bellEnabled,
+    ambientSound,
+    ambientVolume,
+    toggleMute,
+    setVoiceEnabled,
+    setBellEnabled,
+    setAmbientSound,
+    setAmbientVolume,
+    startAmbient,
+    stopAmbient,
+    triggerPhaseCue,
+  } = useSoundMachine();
+
+  const prevPhaseRef = useRef<SessionPhase | null>(null);
+
+  // Manage ambient soundscape based on session lifecycle
+  useEffect(() => {
+    if (state.status === 'breathing') {
+      startAmbient();
+    } else {
+      stopAmbient();
+    }
+
+    return () => {
+      stopAmbient();
+    };
+  }, [state.status, startAmbient, stopAmbient]);
+
+  // Trigger audio cues (voice + singing bowl chime) when breathing phase transitions
+  useEffect(() => {
+    if (state.status === 'breathing') {
+      if (prevPhaseRef.current !== state.currentPhase) {
+        triggerPhaseCue(state.currentPhase);
+        prevPhaseRef.current = state.currentPhase;
+      }
+    }
+  }, [state.status, state.currentPhase, triggerPhaseCue]);
+
   const formatTime = (totalSecs: number) => {
     const mins = Math.floor(totalSecs / 60);
     const secs = totalSecs % 60;
     return `${mins}:${secs.toString().padStart(2, '0')}`;
+  };
+
+  const handleCancel = () => {
+    stopAmbient();
+    onCancel();
   };
 
   // State: Reflecting (Mood after check-in)
@@ -64,7 +127,7 @@ export default function SessionScreen({
                 {formatTime(state.elapsedSeconds)} of mindful breathing. How do you feel now?
               </p>
             </div>
-            <div className="bg-white p-6 rounded-[32px] border border-cream shadow-sm w-full">
+            <div className="bg-card p-6 rounded-[32px] border border-cream shadow-sm w-full">
               <MoodCheck onSelect={(mood) => recordMoodAndEnd(mood)} selectedMood={state.moodAfter} />
             </div>
             <Button
@@ -87,17 +150,46 @@ export default function SessionScreen({
         <Button
           variant="ghost"
           size="icon"
-          onClick={onCancel}
+          onClick={handleCancel}
           className="rounded-full bg-cream/20 hover:bg-cream/40 text-accent-green"
           aria-label="Cancel session"
         >
           <X className="w-6 h-6" />
         </Button>
+
         <div className="flex flex-col items-center">
-          <span className="text-[10px] font-bold text-accent-green uppercase tracking-[2px] opacity-50">Mode</span>
+          <span className="text-[10px] font-bold text-accent-green uppercase tracking-[2px] opacity-50">
+            Mode
+          </span>
           <h2 className="text-xl font-serif text-deep-forest">{config.label}</h2>
         </div>
-        <div className="w-10 flex justify-end">
+
+        {/* Audio & Playback Controls */}
+        <div className="flex items-center gap-2">
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={toggleMute}
+            className={`rounded-full transition-colors ${
+              isMuted ? 'bg-rose-50 text-rose-500 hover:bg-rose-100' : 'bg-cream/20 hover:bg-cream/40 text-accent-green'
+            }`}
+            aria-label={isMuted ? 'Unmute audio' : 'Mute audio'}
+            title={isMuted ? 'Unmute audio' : 'Mute audio'}
+          >
+            {isMuted ? <VolumeX className="w-5 h-5" /> : <Volume2 className="w-5 h-5" />}
+          </Button>
+
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => setShowSoundModal(true)}
+            className="rounded-full bg-cream/20 hover:bg-cream/40 text-accent-green"
+            aria-label="Sound settings"
+            title="Sound settings"
+          >
+            <Music className="w-5 h-5" />
+          </Button>
+
           {state.status === 'breathing' && (
             <Button
               variant="ghost"
@@ -109,6 +201,7 @@ export default function SessionScreen({
               <Pause className="w-5 h-5" />
             </Button>
           )}
+
           {state.status === 'paused' && (
             <Button
               variant="ghost"
@@ -202,7 +295,7 @@ export default function SessionScreen({
                   <Button
                     onClick={resume}
                     size="sm"
-                    className="rounded-full bg-accent-green text-white hover:bg-deep-forest px-6 text-xs font-bold uppercase tracking-wider"
+                    className="rounded-full bg-accent-green text-white dark:text-zinc-950 hover:bg-deep-forest px-6 text-xs font-bold uppercase tracking-wider"
                   >
                     <Play className="w-3.5 h-3.5 mr-1.5 fill-current" /> Resume
                   </Button>
@@ -242,9 +335,9 @@ export default function SessionScreen({
 
       {/* Bottom Actions and Progress Bar */}
       <div className="w-full max-w-lg mx-auto flex flex-col gap-4 items-center pb-4 flex-shrink-0">
-        <div className="w-full h-1.5 bg-cream/30 rounded-full overflow-hidden">
+        <div className="w-full h-1.5 bg-cream/50 rounded-full overflow-hidden">
           <motion.div
-            className="h-full bg-accent-green shadow-[0_0_10px_rgba(90,90,64,0.3)] transition-all duration-300"
+            className="h-full bg-accent-green shadow-[0_0_12px_rgba(36,92,66,0.3)] dark:shadow-[0_0_12px_rgba(82,183,136,0.4)] transition-all duration-300"
             style={{ width: `${progressPercentage}%` }}
           />
         </div>
@@ -263,12 +356,139 @@ export default function SessionScreen({
           <Button
             variant="ghost"
             onClick={finish}
-            className="text-xs font-bold text-accent-green uppercase tracking-[2px] opacity-60 hover:opacity-100 transition-all hover:bg-cream/10 rounded-full px-8 py-3"
+            className="text-xs font-bold text-accent-green uppercase tracking-[2px] opacity-80 hover:opacity-100 transition-all hover:bg-muted rounded-full px-8 py-3"
           >
             Finish Session
           </Button>
         </div>
       </div>
+
+      {/* Audio & Ambience Settings Modal */}
+      <AnimatePresence>
+        {showSoundModal && (
+          <div className="fixed inset-0 z-[60] bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: 10 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 10 }}
+              className="bg-card text-card-foreground rounded-[32px] p-6 sm:p-8 max-w-sm w-full border border-cream shadow-2xl flex flex-col gap-6"
+            >
+              <div className="flex justify-between items-center">
+                <div className="flex items-center gap-2">
+                  <Music className="w-5 h-5 text-soft-sage" />
+                  <h3 className="text-lg font-serif text-deep-forest dark:text-foreground">Sound & Ambience</h3>
+                </div>
+                <button
+                  onClick={() => setShowSoundModal(false)}
+                  className="p-1 rounded-full text-accent-green opacity-50 hover:opacity-100 hover:bg-cream/20"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+
+              {/* Toggles */}
+              <div className="space-y-4">
+                <div className="flex justify-between items-center">
+                  <div>
+                    <p className="text-sm font-bold text-deep-forest">Voice Guidance</p>
+                    <p className="text-[10px] text-accent-green opacity-60">"Breathe in", "Hold", "Breathe out"</p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setVoiceEnabled(!voiceEnabled)}
+                    className={`w-12 h-7 rounded-full p-1 transition-colors ${
+                      voiceEnabled ? 'bg-accent-green' : 'bg-cream/40'
+                    }`}
+                  >
+                    <div
+                      className={`w-5 h-5 rounded-full bg-white transition-transform ${
+                        voiceEnabled ? 'translate-x-5' : 'translate-x-0'
+                      }`}
+                    />
+                  </button>
+                </div>
+
+                <div className="flex justify-between items-center">
+                  <div>
+                    <p className="text-sm font-bold text-deep-forest">Singing Bowl Chime</p>
+                    <p className="text-[10px] text-accent-green opacity-60">Tibetan 432Hz bell on phase transition</p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setBellEnabled(!bellEnabled)}
+                    className={`w-12 h-7 rounded-full p-1 transition-colors ${
+                      bellEnabled ? 'bg-accent-green' : 'bg-cream/40'
+                    }`}
+                  >
+                    <div
+                      className={`w-5 h-5 rounded-full bg-white transition-transform ${
+                        bellEnabled ? 'translate-x-5' : 'translate-x-0'
+                      }`}
+                    />
+                  </button>
+                </div>
+              </div>
+
+              {/* Ambient Sound Selection */}
+              <div className="space-y-2">
+                <p className="text-xs font-bold text-accent-green/80 uppercase tracking-wider">
+                  Background Ambience
+                </p>
+                <div className="grid grid-cols-2 gap-2">
+                  {[
+                    { id: 'bowl' as AmbientSoundType, label: 'Zen Bowl (432Hz)' },
+                    { id: 'ocean' as AmbientSoundType, label: 'Ocean Waves' },
+                    { id: 'rain' as AmbientSoundType, label: 'Gentle Rain' },
+                    { id: 'none' as AmbientSoundType, label: 'Silence' },
+                  ].map((s) => (
+                    <button
+                      key={s.id}
+                      type="button"
+                      onClick={() => setAmbientSound(s.id)}
+                      className={`p-3 rounded-2xl border text-xs font-bold text-left transition-all flex items-center justify-between ${
+                        ambientSound === s.id
+                          ? 'border-accent-green bg-accent-green/10 text-accent-green'
+                          : 'border-cream bg-bg-page/40 text-deep-forest hover:border-soft-sage/40'
+                      }`}
+                    >
+                      <span>{s.label}</span>
+                      {ambientSound === s.id && <Check className="w-3.5 h-3.5 text-accent-green" />}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Ambient Volume Slider */}
+              {ambientSound !== 'none' && (
+                <div className="space-y-2">
+                  <div className="flex justify-between text-xs">
+                    <span className="font-bold text-accent-green opacity-60 uppercase tracking-wider">
+                      Ambience Volume
+                    </span>
+                    <span className="font-mono text-accent-green">{Math.round(ambientVolume * 100)}%</span>
+                  </div>
+                  <input
+                    type="range"
+                    min="0"
+                    max="1"
+                    step="0.05"
+                    value={ambientVolume}
+                    onChange={(e) => setAmbientVolume(parseFloat(e.target.value))}
+                    className="w-full accent-accent-green cursor-pointer"
+                  />
+                </div>
+              )}
+
+              <Button
+                onClick={() => setShowSoundModal(false)}
+                className="w-full h-11 rounded-2xl bg-accent-green hover:bg-deep-forest text-white dark:text-zinc-950 font-bold"
+              >
+                Done
+              </Button>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

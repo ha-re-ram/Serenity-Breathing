@@ -40,11 +40,11 @@ export default function OnboardingModal({ onComplete }: OnboardingModalProps) {
   const { inhale, hold, exhale, holdPost } = state.customBreathing;
 
   return (
-    <div className="fixed inset-0 z-[100] bg-deep-forest/40 backdrop-blur-md flex items-center justify-center p-4 overflow-y-auto">
+    <div className="fixed inset-0 z-[100] bg-black/60 backdrop-blur-md flex items-center justify-center p-4 overflow-y-auto">
       <motion.div
         initial={{ opacity: 0, scale: 0.9, y: 20 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
-        className="w-full max-w-md bg-bg-page rounded-[40px] shadow-2xl border border-cream my-auto"
+        className="w-full max-w-md bg-card text-card-foreground rounded-[40px] shadow-2xl border border-cream my-auto"
       >
         <div className="p-6 sm:p-8 flex flex-col gap-6">
           {/* Progress Indicator & Back Button */}
@@ -53,7 +53,7 @@ export default function OnboardingModal({ onComplete }: OnboardingModalProps) {
               {!isFirstStep && (
                 <button
                   onClick={prevStep}
-                  className="p-1.5 -ml-1 text-accent-green opacity-50 hover:opacity-100 rounded-full hover:bg-cream/20 transition-all"
+                  className="p-1.5 -ml-1 text-accent-green/80 hover:text-accent-green rounded-full hover:bg-muted transition-all"
                   aria-label="Previous step"
                 >
                   <ChevronLeft className="w-4 h-4" />
@@ -63,14 +63,14 @@ export default function OnboardingModal({ onComplete }: OnboardingModalProps) {
                 {[1, 2, 3].map((i) => (
                   <div
                     key={i}
-                    className={`h-1 rounded-full transition-all ${
-                      state.stepIndex >= i ? 'w-8 bg-accent-green' : 'w-4 bg-cream'
+                    className={`h-1.5 rounded-full transition-all ${
+                      state.stepIndex >= i ? 'w-8 bg-accent-green' : 'w-4 bg-muted'
                     }`}
                   />
                 ))}
               </div>
             </div>
-            <span className="text-[10px] font-bold text-accent-green uppercase tracking-widest opacity-50">
+            <span className="text-[10px] font-bold text-accent-green/80 uppercase tracking-widest">
               Step {state.stepIndex} of {totalSteps}
             </span>
           </div>
@@ -102,7 +102,7 @@ export default function OnboardingModal({ onComplete }: OnboardingModalProps) {
                     type="time"
                     value={state.reminderTime}
                     onChange={(e) => setReminderTime(e.target.value)}
-                    className="h-12 rounded-2xl border-cream bg-white text-base font-bold text-deep-forest"
+                    className="h-12 rounded-2xl border-cream bg-bg-page/50 text-base font-bold text-deep-forest"
                   />
                 </div>
               </motion.div>
@@ -142,7 +142,7 @@ export default function OnboardingModal({ onComplete }: OnboardingModalProps) {
                         max={30}
                         value={item.val}
                         onChange={(e) => setBreathingField(item.key, Number(e.target.value))}
-                        className="h-11 rounded-xl border-cream"
+                        className="h-11 rounded-xl border-cream bg-bg-page/40"
                       />
                     </div>
                   ))}
@@ -157,7 +157,7 @@ export default function OnboardingModal({ onComplete }: OnboardingModalProps) {
                       key={i}
                       type="button"
                       onClick={() => applyPreset(rec.cycle)}
-                      className="w-full p-3 rounded-2xl border border-cream bg-white hover:border-soft-sage transition-all text-left flex justify-between items-center group"
+                      className="w-full p-3 rounded-2xl border border-cream bg-bg-page/50 hover:border-soft-sage transition-all text-left flex justify-between items-center group"
                     >
                       <div>
                         <p className="font-bold text-deep-forest text-sm group-hover:text-accent-green">
@@ -193,7 +193,7 @@ export default function OnboardingModal({ onComplete }: OnboardingModalProps) {
                   </p>
                 </div>
 
-                <Card className="border border-cream shadow-none bg-white rounded-3xl p-5 text-left w-full">
+                <Card className="border border-cream shadow-none bg-bg-page/50 rounded-3xl p-5 text-left w-full">
                   <div className="space-y-3">
                     <div className="flex justify-between items-center">
                       <span className="text-xs text-accent-green opacity-60">Daily Reminder</span>
@@ -224,7 +224,7 @@ export default function OnboardingModal({ onComplete }: OnboardingModalProps) {
             )}
             <Button
               onClick={handleNext}
-              className="flex-1 h-13 rounded-full bg-accent-green text-white font-bold shadow-lg shadow-accent-green/20"
+              className="flex-1 h-13 rounded-full bg-accent-green text-white dark:text-zinc-950 font-bold shadow-lg shadow-accent-green/20"
             >
               {isLastStep ? 'Get Started' : 'Continue'}
               {!isLastStep && <ChevronRight className="w-4 h-4 ml-2" />}

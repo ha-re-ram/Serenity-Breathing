@@ -47,13 +47,19 @@ export function evaluateHabit(habit: Habit, referenceDate: Date = new Date()): H
 
 /**
  * Transitions habit state when toggling completion for today.
- * If already completed today, returns unchanged habit.
+ * Supports bidirectional toggling: if already completed today, untoggles today's completion (undo).
  */
 export function toggleHabitCompletion(habit: Habit, referenceDate: Date = new Date()): Habit {
   const evaluation = evaluateHabit(habit, referenceDate);
 
   if (evaluation.isCompletedToday) {
-    return habit;
+    const revertedStreak = Math.max(0, habit.streak - 1);
+    const revertedDate = revertedStreak > 0 ? subDays(referenceDate, 1).toISOString() : undefined;
+    return {
+      ...habit,
+      streak: revertedStreak,
+      lastCompletedDate: revertedDate,
+    };
   }
 
   return {

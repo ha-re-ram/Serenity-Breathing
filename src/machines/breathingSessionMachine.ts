@@ -196,7 +196,7 @@ export function useBreathingSessionMachine({
         holdPost: customConfig?.holdPost || 0,
         label: 'Personal Rhythm',
         description: 'Your custom breathing cycle',
-        color: 'bg-accent-green',
+        color: 'bg-teal-600',
       }
     : BREATHING_MODES[mode] || BREATHING_MODES.calm;
 

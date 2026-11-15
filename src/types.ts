@@ -1,4 +1,4 @@
-export type BreathingMode = 'calm' | 'focus' | 'sleep' | 'morning' | 'power' | 'box';
+export type BreathingMode = 'calm' | 'focus' | 'sleep' | 'morning' | 'power' | 'box' | 'custom';
 
 export interface BreathingConfig {
   inhale: number;
@@ -16,7 +16,7 @@ export const BREATHING_MODES: Record<BreathingMode, BreathingConfig> = {
     exhale: 4,
     label: 'Calm',
     description: 'Simple 4-4 rhythm to relax',
-    color: 'bg-soft-sage',
+    color: 'bg-emerald-600',
   },
   focus: {
     inhale: 4,
@@ -33,21 +33,21 @@ export const BREATHING_MODES: Record<BreathingMode, BreathingConfig> = {
     exhale: 8,
     label: 'Sleep',
     description: '4-7-8 technique to drift off',
-    color: 'bg-deep-forest',
+    color: 'bg-indigo-900',
   },
   morning: {
     inhale: 3,
     exhale: 3,
     label: 'Morning',
     description: 'Energizing 3-3 rhythm',
-    color: 'bg-cream',
+    color: 'bg-amber-500',
   },
   power: {
     inhale: 1,
     exhale: 1,
     label: 'Power',
     description: 'Rapid breaths for energy',
-    color: 'bg-rose-400',
+    color: 'bg-rose-500',
   },
   box: {
     inhale: 4,
@@ -56,7 +56,16 @@ export const BREATHING_MODES: Record<BreathingMode, BreathingConfig> = {
     holdPost: 4,
     label: 'Box',
     description: 'Navy SEAL focus technique',
-    color: 'bg-blue-400',
+    color: 'bg-sky-600',
+  },
+  custom: {
+    inhale: 4,
+    hold: 4,
+    exhale: 4,
+    holdPost: 4,
+    label: 'Personal Rhythm',
+    description: 'Your custom breathing cycle',
+    color: 'bg-teal-600',
   },
 };
 

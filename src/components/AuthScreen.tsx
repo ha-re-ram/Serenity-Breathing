@@ -1,5 +1,5 @@
 import { FormEvent } from 'react';
-import { WifiOff } from 'lucide-react';
+import { WifiOff, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -13,7 +13,12 @@ import {
 import { auth } from '../firebase';
 import { useAuthFormMachine } from '../machines/authFormMachine';
 
-export default function AuthScreen() {
+export interface AuthScreenProps {
+  onClose?: () => void;
+  onSuccess?: () => void;
+}
+
+export default function AuthScreen({ onClose, onSuccess }: AuthScreenProps = {}) {
   const {
     state,
     switchMode,
@@ -33,7 +38,8 @@ export default function AuthScreen() {
       const userCredential = await createUserWithEmailAndPassword(auth, state.email, state.password);
       await updateProfile(userCredential.user, { displayName: state.name });
       succeedSubmit();
-      toast.success('Welcome to Serenity!');
+      toast.success('Welcome to Serenity Cloud!');
+      onSuccess?.();
     } catch (error: any) {
       failSubmit(error.message);
       toast.error('Could not create account: ' + error.message);
@@ -49,7 +55,8 @@ export default function AuthScreen() {
     try {
       await signInWithEmailAndPassword(auth, state.email, state.password);
       succeedSubmit();
-      toast.success('Welcome back!');
+      toast.success('Welcome back to Serenity!');
+      onSuccess?.();
     } catch (error: any) {
       failSubmit(error.message);
       toast.error('Login failed: ' + error.message);
@@ -73,11 +80,16 @@ export default function AuthScreen() {
 
   if (!auth) {
     return (
-      <div className="flex items-center justify-center min-h-screen bg-[#FDFCF8] p-6">
+      <div className="flex items-center justify-center min-h-[400px] p-6">
         <div className="text-center">
           <WifiOff className="w-12 h-12 text-rose-500 mx-auto mb-4" />
-          <h2 className="text-2xl font-serif text-[#344E41]">Connection Error</h2>
-          <p className="text-[#5A5A40] opacity-70">Please check your Firebase configuration.</p>
+          <h2 className="text-2xl font-serif text-deep-forest">Connection Error</h2>
+          <p className="text-accent-green opacity-70">Please check your Firebase configuration.</p>
+          {onClose && (
+            <Button onClick={onClose} variant="outline" className="mt-4 rounded-full border-cream">
+              Continue Offline
+            </Button>
+          )}
         </div>
       </div>
     );
@@ -86,30 +98,41 @@ export default function AuthScreen() {
   const isSubmitting = state.status === 'submitting';
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-[#FDFCF8] p-6">
-      <div className="w-full max-w-[400px]">
+    <div className="flex items-center justify-center p-4 sm:p-6 w-full">
+      <div className="w-full max-w-[420px] relative">
         {/* Brand Header */}
-        <div className="text-center mb-10">
-          <div className="w-12 h-12 bg-[#5A5A40] rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg shadow-[#5A5A40]/10">
-            <div className="w-4 h-4 bg-white rounded-full" />
+        <div className="text-center mb-8">
+          <div className="w-12 h-12 bg-accent-green rounded-2xl flex items-center justify-center mx-auto mb-3 shadow-lg shadow-accent-green/10">
+            <div className="w-4 h-4 bg-white rounded-full animate-pulse" />
           </div>
-          <h1 className="text-3xl font-serif text-[#344E41] mb-1">Serenity</h1>
-          <p className="text-[10px] font-bold text-[#5A5A40] uppercase tracking-[3px] opacity-40">
-            Mindfulness & Balance
+          <h1 className="text-3xl font-serif text-deep-forest mb-1">Serenity Sanctuary</h1>
+          <p className="text-[10px] font-bold text-accent-green/80 uppercase tracking-[3px]">
+            Cloud Sync & Backup
           </p>
         </div>
 
         {/* Auth Form Card */}
-        <div className="bg-white p-8 rounded-[40px] border border-[#DAD7CD] shadow-sm">
+        <div className="bg-card text-card-foreground p-6 sm:p-8 rounded-[40px] border border-cream shadow-xl relative">
+          {onClose && (
+            <button
+              type="button"
+              onClick={onClose}
+              className="absolute top-6 right-6 p-1.5 rounded-full text-accent-green/70 hover:text-accent-green hover:bg-muted transition-all"
+              aria-label="Close"
+            >
+              <X className="w-5 h-5" />
+            </button>
+          )}
+
           {state.mode === 'forgotPassword' ? (
             <div className="space-y-6">
               <div className="text-center mb-6">
-                <h2 className="text-xl font-serif text-[#344E41]">Reset Password</h2>
-                <p className="text-xs text-[#5A5A40] opacity-60 mt-1">We'll send a recovery link to your email.</p>
+                <h2 className="text-xl font-serif text-deep-forest">Reset Password</h2>
+                <p className="text-xs text-accent-green/80 mt-1">We'll send a recovery link to your email.</p>
               </div>
               <form onSubmit={handleResetPassword} className="space-y-4">
                 <div className="space-y-1">
-                  <Label htmlFor="reset-email" className="text-[10px] uppercase tracking-wider opacity-60 ml-1">
+                  <Label htmlFor="reset-email" className="text-[10px] font-bold text-accent-green/80 uppercase tracking-wider ml-1">
                     Email Address
                   </Label>
                   <Input
@@ -118,21 +141,21 @@ export default function AuthScreen() {
                     value={state.email}
                     onChange={(e) => setField('email', e.target.value)}
                     placeholder="Enter your email"
-                    className="h-12 rounded-2xl border-[#DAD7CD] focus:border-[#5A5A40] focus:ring-0"
+                    className="h-12 rounded-2xl border-cream bg-bg-page/40 text-deep-forest focus:border-accent-green focus:ring-0"
                     disabled={isSubmitting}
                   />
                 </div>
                 <Button
                   type="submit"
                   disabled={isSubmitting}
-                  className="w-full h-12 rounded-2xl bg-[#5A5A40] hover:bg-[#344E41] text-white font-bold transition-colors"
+                  className="w-full h-12 rounded-2xl bg-accent-green hover:bg-deep-forest text-white dark:text-zinc-950 font-bold transition-colors"
                 >
                   {isSubmitting ? 'Sending...' : 'Send Reset Link'}
                 </Button>
                 <button
                   type="button"
                   onClick={() => switchMode('signIn')}
-                  className="w-full text-xs font-bold text-[#5A5A40] opacity-40 hover:opacity-100 transition-opacity"
+                  className="w-full text-xs font-bold text-accent-green/80 hover:text-accent-green transition-opacity"
                 >
                   Back to Login
                 </button>
@@ -140,21 +163,21 @@ export default function AuthScreen() {
             </div>
           ) : (
             <>
-              <div className="text-center mb-8">
-                <h2 className="text-xl font-serif text-[#344E41]">
-                  {state.mode === 'signIn' ? 'Welcome Back' : 'Create Account'}
+              <div className="text-center mb-6">
+                <h2 className="text-xl font-serif text-deep-forest">
+                  {state.mode === 'signIn' ? 'Sign In' : 'Create Free Account'}
                 </h2>
-                <p className="text-xs text-[#5A5A40] opacity-60 mt-1">
+                <p className="text-xs text-accent-green/80 mt-1">
                   {state.mode === 'signIn'
-                    ? 'Enter your details to find your calm.'
-                    : 'Start your mindfulness journey today.'}
+                    ? 'Sync your progress and habits across all devices.'
+                    : 'Save your mindfulness streaks and records safely.'}
                 </p>
               </div>
 
               <form onSubmit={state.mode === 'signIn' ? handleLogin : handleSignUp} className="space-y-4">
                 {state.mode === 'signUp' && (
                   <div className="space-y-1">
-                    <Label htmlFor="name" className="text-[10px] uppercase tracking-wider opacity-60 ml-1">
+                    <Label htmlFor="name" className="text-[10px] font-bold text-accent-green/80 uppercase tracking-wider ml-1">
                       Full Name
                     </Label>
                     <Input
@@ -162,13 +185,13 @@ export default function AuthScreen() {
                       placeholder="Enter your full name"
                       value={state.name}
                       onChange={(e) => setField('name', e.target.value)}
-                      className="h-12 rounded-2xl border-[#DAD7CD]"
+                      className="h-12 rounded-2xl border-cream bg-bg-page/40 text-deep-forest"
                       disabled={isSubmitting}
                     />
                   </div>
                 )}
                 <div className="space-y-1">
-                  <Label htmlFor="email" className="text-[10px] uppercase tracking-wider opacity-60 ml-1">
+                  <Label htmlFor="email" className="text-[10px] font-bold text-accent-green/80 uppercase tracking-wider ml-1">
                     Email Address
                   </Label>
                   <Input
@@ -177,20 +200,20 @@ export default function AuthScreen() {
                     placeholder="Enter your email address"
                     value={state.email}
                     onChange={(e) => setField('email', e.target.value)}
-                    className="h-12 rounded-2xl border-[#DAD7CD]"
+                    className="h-12 rounded-2xl border-cream bg-bg-page/40 text-deep-forest"
                     disabled={isSubmitting}
                   />
                 </div>
                 <div className="space-y-1">
                   <div className="flex justify-between items-center px-1">
-                    <Label htmlFor="password" className="text-[10px] uppercase tracking-wider opacity-60">
+                    <Label htmlFor="password" className="text-[10px] font-bold text-accent-green/80 uppercase tracking-wider">
                       Password
                     </Label>
                     {state.mode === 'signIn' && (
                       <button
                         type="button"
                         onClick={() => switchMode('forgotPassword')}
-                        className="text-[10px] font-bold text-[#5A5A40] opacity-40 hover:opacity-100"
+                        className="text-[10px] font-bold text-accent-green/80 hover:text-accent-green"
                       >
                         Forgot?
                       </button>
@@ -202,44 +225,51 @@ export default function AuthScreen() {
                     placeholder="Enter your password"
                     value={state.password}
                     onChange={(e) => setField('password', e.target.value)}
-                    className="h-12 rounded-2xl border-[#DAD7CD]"
+                    className="h-12 rounded-2xl border-cream bg-bg-page/40 text-deep-forest"
                     disabled={isSubmitting}
                   />
                 </div>
                 <Button
                   type="submit"
                   disabled={isSubmitting}
-                  className="w-full h-12 rounded-2xl bg-[#5A5A40] hover:bg-[#344E41] text-white font-bold transition-colors mt-2"
+                  className="w-full h-12 rounded-2xl bg-accent-green hover:bg-deep-forest text-white dark:text-zinc-950 font-bold transition-colors mt-2"
                 >
                   {isSubmitting
                     ? state.mode === 'signIn'
                       ? 'Logging in...'
-                      : 'Registering...'
+                      : 'Creating Account...'
                     : state.mode === 'signIn'
-                    ? 'Log In'
-                    : 'Sign Up'}
+                    ? 'Sign In to Cloud'
+                    : 'Create Free Account'}
                 </Button>
               </form>
 
-              <div className="mt-8 pt-6 border-t border-[#DAD7CD]/30 text-center">
-                <p className="text-xs text-[#5A5A40] opacity-60">
-                  {state.mode === 'signIn' ? "Don't have an account?" : 'Already have an account?'}
+              <div className="mt-6 pt-5 border-t border-cream/50 text-center">
+                <p className="text-xs text-accent-green/80">
+                  {state.mode === 'signIn' ? "Don't have an account yet?" : 'Already have an account?'}
                   <button
                     onClick={() => switchMode(state.mode === 'signIn' ? 'signUp' : 'signIn')}
-                    className="ml-2 font-bold text-[#5A5A40] hover:text-[#344E41]"
+                    className="ml-2 font-bold text-accent-green hover:text-deep-forest underline decoration-dotted"
                   >
-                    {state.mode === 'signIn' ? 'Sign Up' : 'Log In'}
+                    {state.mode === 'signIn' ? 'Register' : 'Log In'}
                   </button>
                 </p>
               </div>
             </>
           )}
-        </div>
 
-        {/* Footer */}
-        <p className="mt-8 text-[10px] text-[#5A5A40] opacity-40 text-center uppercase tracking-[2px]">
-          Professional Mindfulness App
-        </p>
+          {onClose && (
+            <div className="mt-4 text-center">
+              <button
+                type="button"
+                onClick={onClose}
+                className="text-xs font-bold text-accent-green opacity-50 hover:opacity-100"
+              >
+                Continue practicing as guest (local only)
+              </button>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );

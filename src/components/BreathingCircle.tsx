@@ -43,9 +43,7 @@ export default function BreathingCircle({ config, isActive, phase, isPaused = fa
           opacity: isPaused ? 0.75 : 1,
         }}
         transition={{ duration: currentDuration, ease: "easeInOut" }}
-        className={`w-48 h-48 rounded-full shadow-2xl flex items-center justify-center ${config.color} ${
-          config.color === 'bg-cream' ? 'text-deep-forest' : 'text-white'
-        } relative overflow-hidden transition-colors duration-700`}
+        className={`w-48 h-48 rounded-full shadow-2xl flex items-center justify-center ${config.color} text-white relative overflow-hidden transition-colors duration-700`}
       >
         <div className={`absolute inset-0 bg-white/10 ${isPaused ? '' : 'animate-pulse'}`} />
         <AnimatePresence mode="wait">

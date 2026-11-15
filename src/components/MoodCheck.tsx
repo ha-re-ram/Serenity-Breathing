@@ -28,11 +28,17 @@ export default function MoodCheck({ onSelect, selectedMood }: MoodCheckProps) {
             whileTap={{ scale: 0.95 }}
             onClick={() => onSelect(mood.id)}
             className={`flex flex-col items-center justify-center gap-2 p-2 rounded-2xl min-w-[70px] transition-all ${
-              isSelected ? 'bg-soft-sage shadow-md' : 'bg-card/50 hover:bg-card border border-cream/30'
+              isSelected
+                ? 'bg-accent-green text-white dark:text-zinc-950 shadow-md scale-105'
+                : 'bg-card hover:bg-muted border border-cream/70'
             }`}
           >
-            <Icon className={`w-6 h-6 ${isSelected ? 'text-white' : mood.color}`} />
-            <span className={`text-[10px] font-bold uppercase tracking-[1px] ${isSelected ? 'text-white' : 'text-accent-green opacity-60'}`}>
+            <Icon className={`w-6 h-6 ${isSelected ? 'text-white dark:text-zinc-950' : mood.color}`} />
+            <span
+              className={`text-[10px] font-bold uppercase tracking-[1px] ${
+                isSelected ? 'text-white dark:text-zinc-950' : 'text-accent-green/80'
+              }`}
+            >
               {mood.label}
             </span>
           </motion.button>

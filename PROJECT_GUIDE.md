@@ -30,7 +30,7 @@
 - **Live URL**: [https://serenity.hareramkushwaha.com.np](https://serenity.hareramkushwaha.com.np)
 - **Author**: Hareram Kushwaha ([hareramkushwaha.com.np](https://hareramkushwaha.com.np))
 - **License**: MIT
-- **Current Version**: 1.2.0
+- **Current Version**: 1.3.0 Professional
 
 ### 1.2 Core Product Principles
 1. **Zero-Lag UX & Optimistic UI**: User interactions (timer actions, slider modifications, habit checks) must respond instantaneously without waiting for network round-trips. Remote state syncs silently in the background with error fallbacks.
@@ -82,13 +82,20 @@
 - [src/index.css](file:///home/ha-re-ram/Codes/Serenity-Breathing/src/index.css) — Tailwind CSS v4 `@theme`, brand colors, dark mode tokens
 - [src/main.tsx](file:///home/ha-re-ram/Codes/Serenity-Breathing/src/main.tsx) — React DOM root render with ThemeProvider & Toaster
 - [src/types.ts](file:///home/ha-re-ram/Codes/Serenity-Breathing/src/types.ts) — TypeScript interfaces: `BreathingConfig`, `UserProfile`, `Habit`, `SessionRecord`
-- [src/machines/](file:///home/ha-re-ram/Codes/Serenity-Breathing/src/machines/) — Explicit, type-safe finite state machines and reducers:
+- [src/machines/](file:///home/ha-re-ram/Projects/Serenity-Breathing/src/machines/) — Explicit, type-safe finite state machines and reducers:
   - `breathingSessionMachine.ts` — Breathwork session lifecycle (`preparing` -> `breathing` -> `paused` -> `reflecting` -> `completed`), accurate progress, pause/resume, deduplicated haptics
   - `authFormMachine.ts` — Authentication mode transitions (`signIn` | `signUp` | `forgotPassword`) and submission state
   - `onboardingMachine.ts` — 3-step onboarding wizard with bidirectional navigation (`reminder` <-> `rhythm` <-> `summary`)
   - `habitMachine.ts` — Pure habit evaluation (`completed_today` | `due` | `missed`) and streak progression
-  - `debouncedSyncMachine.ts` — Optimistic local updates with debounced remote persistence (`idle` | `debouncing` | `saving` | `error`)
-  - `machines.test.ts` — Native Node/TSX unit test suite for state machines
+  - `sessionStreakMachine.ts` — Pure user session streak machine (`completed_today` | `due` | `missed`), streak-at-risk warning, non-duplicating same-day practice
+  - `healthMetricMachine.ts` — Mindful BMI and holistic wellness categorization (`nourishment_needed` | `pure_serenity` | `self_care_goal` | `health_priority`)
+  - `authSyncMachine.ts` — Firebase Auth and Firestore profile lifecycle (`initializing` -> `unauthenticated` | `syncing_profile` -> `ready` | `sync_error`)
+  - `appNavigationMachine.ts` — Top-level tab navigation (`home` | `progress` | `settings`), active modal sessions, and preference clamping
+  - `quoteMachine.ts` — Daily mindfulness inspiration lifecycle (`loading` -> `ready`) with user-triggered cycling
+  - `debouncedSyncMachine.ts` — Optimistic local updates with debounced remote persistence (`idle` | `debouncing` | `saving` | `error`) and live UI status indicator
+  - `soundMachine.ts` — Audio engine state machine for voice guidance, Tibetan singing bowl 432Hz chimes, procedural ambient soundscapes, and master mute controls
+  - `machines.test.ts` — Native Node/TSX unit test suite for all 11 state machines
+- [src/services/audioEngine.ts](file:///home/ha-re-ram/Projects/Serenity-Breathing/src/services/audioEngine.ts) — Web Audio API procedural sound synthesizer (Zen 432Hz Drone, Ocean Waves, Gentle Rain, Solfeggio bell harmonics) & Web Speech API voice guide
 - [src/constants/quotes.ts](file:///home/ha-re-ram/Codes/Serenity-Breathing/src/constants/quotes.ts) — Curated list of mindfulness quotes & random picker
 - [src/components/AuthScreen.tsx](file:///home/ha-re-ram/Codes/Serenity-Breathing/src/components/AuthScreen.tsx) — Login, Registration & Password Reset screen
 - [src/components/BreathingCircle.tsx](file:///home/ha-re-ram/Codes/Serenity-Breathing/src/components/BreathingCircle.tsx) — Animated SVG/Framer circle with phase dilation & haptics
@@ -280,11 +287,11 @@ The project uses **Tailwind CSS v4** with a custom color palette tailored for ca
 
 | Token Variable | Light Mode | Dark Mode | Usage |
 |---|---|---|---|
-| `--color-bg-page` | `#F5F5F0` | `#1A1A15` | Overall page backdrop |
-| `--color-accent-green` | `#5A5A40` | `#A3B18A` | Primary brand accent, primary CTA buttons |
-| `--color-soft-sage` | `#A3B18A` | `#5A5A40` | Subtle indicators, active streaks, tags |
-| `--color-cream` | `#DAD7CD` | `#344E41` | Borders, subtle dividers, pill backdrops |
-| `--color-deep-forest` | `#344E41` | `#DAD7CD` | Headings, primary high-contrast text |
+| `--color-bg-page` | `#F4F7F5` | `#0B130E` | Overall page backdrop (porcelain dew / nocturnal forest canopy) |
+| `--color-accent-green` | `#245C42` | `#52B788` | Primary brand accent, primary CTA buttons (restorative eucalyptus jade) |
+| `--color-soft-sage` | `#4E9A74` | `#74C69D` | Subtle indicators, active streaks, tags (dewy mountain mint-sage) |
+| `--color-cream` | `#DDE6E0` | `#1D3327` | Borders, subtle dividers, pill backdrops (morning leaf / nocturnal pine) |
+| `--color-deep-forest` | `#163326` | `#EDF5F0` | Headings, primary high-contrast text (evergreen obsidian / moonlit pearl) |
 
 ### 8.2 Typography
 - **Headings & Meditative Text**: Georgia serif font (`font-serif`, `.serif`), italicized for calm, reflective moments.
@@ -413,6 +420,10 @@ npm run clean    # Removes dist folder
 
 | Date (YYYY-MM-DD) | Author / Agent | Changes Made | Files Affected |
 |---|---|---|---|
+| **2026-11-15** | Antigravity AI | **Visual Sanctuary & Eye-Ease Chromatic Overhaul (v1.3.1 Professional)**: Replaced legacy muddy olive-drab khaki (`#5A5A40`) and dingy stone (`#F5F5F0` / `#1A1A15`) with a tranquil, restorative Botanical Eucalyptus & Nocturnal Sanctuary palette. Light mode: porcelain morning dew (`#F4F7F5`), deep evergreen pine text (`#163326`, 12.8:1 AAA contrast), and eucalyptus jade (`#245C42`). Dark mode: nocturnal forest canopy (`#0B130E`, eliminates retinal fatigue), elevated nocturnal glass (`#13221A`), moonlit pearl ivory (`#EDF5F0`, 16.6:1 AAA contrast), and radiant seafoam mint (`#52B788`). Normalized small typography from hazy `opacity-40`/`50` to crisp `text-accent-green/80`. Upgraded breathing circles to vivid, distinct identities with clean white text. Updated meta theme-colors in `index.html` and `manifest.json`. All 11 tests passing, 0 lint errors, clean build. | `src/index.css`, `src/types.ts`, `src/App.tsx`, `src/components/*`, `index.html`, `public/manifest.json`, `qa_expert_audit_report.md`, `PROJECT_GUIDE.md` |
+| **2026-11-15** | Antigravity AI | **Senior QA & UX/DX/AX Polish (v1.3.0 Professional)**: Conducted end-to-end audit documenting 18 defects in `qa_expert_audit_report.md`. Remediated WCAG AAA contrast violations across light/dark themes (mobile nav bar, desktop sidebar, dark mode button text), unlocked Web Audio API & Speech Synthesis on iOS Safari/Android user gestures synchronously, made habit checks reversible (untoggling accidental completions), added reactive `key` bindings to uncontrolled profile inputs to prevent async loading race conditions, added offline SPA navigate fallback to `public/sw.js` (v3), eliminated `as any` casts by formalizing `'custom'` in `BreathingMode`, added empty-state feedback in Progress screen, and verified 11/11 tests pass with zero type or build errors. | `public/sw.js`, `src/App.tsx`, `src/types.ts`, `src/services/audioEngine.ts`, `src/machines/habitMachine.ts`, `src/machines/machines.test.ts`, `src/components/HomeScreen.tsx`, `src/components/SessionScreen.tsx`, `src/components/AuthScreen.tsx`, `src/components/OnboardingModal.tsx`, `src/components/ProgressScreen.tsx`, `package.json`, `PROJECT_GUIDE.md` |
+| **2026-11-15** | Antigravity AI | Removed mandatory login gate to make Serenity instantly accessible without login as a public wellness platform; local storage powers guest streaks, habits, and records with optional Cloud Sync in Profile. Built procedural Web Audio API & Speech Synthesis engine (`soundMachine` & `audioEngine`) featuring spoken phase guidance ("Breathe in", "Hold", "Breathe out"), 432Hz Tibetan singing bowl bells, procedural ambient soundscapes (Zen Drone, Ocean Waves, Gentle Rain), and master mute controls. Engineered Search-First SEO architecture with comprehensive JSON-LD graphs (`WebApplication`, `FAQPage`, `HowTo`) and prerendered fallback semantics. 11/11 unit tests passing. | `src/services/audioEngine.ts`, `src/machines/soundMachine.ts`, `src/machines/authSyncMachine.ts`, `src/components/SessionScreen.tsx`, `src/components/AuthScreen.tsx`, `src/App.tsx`, `index.html`, `public/sitemap.xml`, `PROJECT_GUIDE.md` |
+| **2026-11-15** | Antigravity AI | Identified and formalized all remaining implicit state machines in the application to elevate UX, DX, and AX: `authSyncMachine` (resolves auth/profile race condition and screen flicker), `sessionStreakMachine` (centralizes streak evaluation and same-day preservation), `healthMetricMachine` (eliminates duplicated BMI calculations between Profile and Progress screens), `appNavigationMachine` (centralizes viewport, tabs, modal sessions, and preference clamping), `quoteMachine` (adds on-demand inspiration refresh), and full `debouncedSyncMachine` integration with live visual saving status pills for custom cycles. Added tests across all 10 machines in `machines.test.ts` (10/10 passing). Zero breaking changes. | `src/machines/*`, `src/App.tsx`, `src/components/HomeScreen.tsx`, `src/components/ProgressScreen.tsx`, `PROJECT_GUIDE.md` |
 | **2026-11-11** | Antigravity AI | Formalized all implicit state machines into type-safe, pure state machines under `src/machines/` (`breathingSessionMachine`, `authFormMachine`, `onboardingMachine`, `habitMachine`, `debouncedSyncMachine`). Elevates UX (warmup countdown, session pause/resume, accurate target duration progress, back-step onboarding, deduplicated haptics), DX (strict TypeScript discriminated unions, pure reducers, zero impossible states), and AX (self-documenting transition graphs, automated test suite). Added `npm test` script. | `src/machines/*`, `src/components/SessionScreen.tsx`, `src/components/BreathingCircle.tsx`, `src/components/AuthScreen.tsx`, `src/components/OnboardingModal.tsx`, `src/components/ProgressScreen.tsx`, `src/App.tsx`, `package.json`, `PROJECT_GUIDE.md` |
 | **2026-09-16** | Antigravity AI | Created comprehensive master project guide & architecture reference (`PROJECT_GUIDE.md`) to serve as the permanent living knowledge base for all future updates and refactors. | `PROJECT_GUIDE.md`, `README.md` |
 
