@@ -16,7 +16,7 @@ interface MoodCheckProps {
 
 export default function MoodCheck({ onSelect, selectedMood }: MoodCheckProps) {
   return (
-    <div className="flex flex-wrap justify-center gap-4 py-4">
+    <div className="grid grid-cols-5 gap-1.5 sm:gap-3 py-3 w-full max-w-md mx-auto">
       {MOODS.map((mood) => {
         const Icon = mood.icon;
         const isSelected = selectedMood === mood.id;
@@ -27,15 +27,15 @@ export default function MoodCheck({ onSelect, selectedMood }: MoodCheckProps) {
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
             onClick={() => onSelect(mood.id)}
-            className={`flex flex-col items-center justify-center gap-2 p-2 rounded-2xl min-w-[70px] transition-all ${
+            className={`flex flex-col items-center justify-center gap-1.5 p-2 sm:p-2.5 rounded-2xl min-w-0 w-full transition-all ${
               isSelected
                 ? 'bg-accent-green text-white dark:text-zinc-950 shadow-md scale-105'
                 : 'bg-card hover:bg-muted border border-cream/70'
             }`}
           >
-            <Icon className={`w-6 h-6 ${isSelected ? 'text-white dark:text-zinc-950' : mood.color}`} />
+            <Icon className={`w-5 h-5 sm:w-6 sm:h-6 ${isSelected ? 'text-white dark:text-zinc-950' : mood.color}`} />
             <span
-              className={`text-[10px] font-bold uppercase tracking-[1px] ${
+              className={`text-[9px] sm:text-[10px] font-bold uppercase tracking-tight sm:tracking-[1px] truncate max-w-full ${
                 isSelected ? 'text-white dark:text-zinc-950' : 'text-accent-green/80'
               }`}
             >

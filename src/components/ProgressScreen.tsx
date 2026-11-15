@@ -133,20 +133,20 @@ export default function ProgressScreen({
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="flex justify-between items-end h-32 gap-2">
+          <div className="flex justify-between items-end h-32 gap-1.5 sm:gap-2">
             {last7Days.map((day, i) => {
               const count = getSessionsForDay(day);
               const height = Math.min(100, (count / 5) * 100);
               return (
-                <div key={i} className="flex-1 flex flex-col items-center gap-2">
-                  <div className="w-full bg-bg-page rounded-t-lg relative h-full overflow-hidden">
+                <div key={i} className="flex-1 flex flex-col items-center gap-1.5 sm:gap-2">
+                  <div className="w-full bg-muted rounded-t-lg relative h-full overflow-hidden">
                     <motion.div
                       initial={{ height: 0 }}
                       animate={{ height: `${height}%` }}
                       className="absolute bottom-0 left-0 w-full bg-soft-sage rounded-t-lg"
                     />
                   </div>
-                  <span className="text-[10px] font-bold text-accent-green/80">
+                  <span className="text-[9px] sm:text-[10px] font-bold text-accent-green/80">
                     {format(day, 'EEE')}
                   </span>
                 </div>

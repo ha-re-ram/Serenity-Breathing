@@ -25,11 +25,11 @@ export default function BreathingCircle({ config, isActive, phase, isPaused = fa
   })();
 
   return (
-    <div className="relative flex items-center justify-center w-64 h-64">
+    <div className="relative flex items-center justify-center w-48 h-48 sm:w-60 sm:h-60">
       {/* Outer Dashed Border */}
       <motion.div
         animate={{
-          scale: getScale() * 1.2,
+          scale: getScale() * 1.15,
           opacity: isPaused ? 0.15 : 0.3,
         }}
         transition={{ duration: currentDuration, ease: "easeInOut" }}
@@ -43,7 +43,7 @@ export default function BreathingCircle({ config, isActive, phase, isPaused = fa
           opacity: isPaused ? 0.75 : 1,
         }}
         transition={{ duration: currentDuration, ease: "easeInOut" }}
-        className={`w-48 h-48 rounded-full shadow-2xl flex items-center justify-center ${config.color} text-white relative overflow-hidden transition-colors duration-700`}
+        className={`w-36 h-36 sm:w-44 sm:h-44 rounded-full shadow-2xl flex items-center justify-center ${config.color} text-white relative overflow-hidden transition-colors duration-700`}
       >
         <div className={`absolute inset-0 bg-white/10 ${isPaused ? '' : 'animate-pulse'}`} />
         <AnimatePresence mode="wait">
@@ -52,7 +52,7 @@ export default function BreathingCircle({ config, isActive, phase, isPaused = fa
             initial={{ opacity: 0, scale: 0.8 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 1.2 }}
-            className="font-serif italic text-2xl capitalize z-10 select-none"
+            className="font-serif italic text-xl sm:text-2xl capitalize z-10 select-none"
           >
             {!isActive ? 'Center' : phase === 'holdPost' ? 'Hold' : phase}
           </motion.span>

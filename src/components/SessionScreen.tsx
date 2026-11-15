@@ -111,8 +111,8 @@ export default function SessionScreen({
   // State: Reflecting (Mood after check-in)
   if (state.status === 'reflecting' || state.status === 'completed') {
     return (
-      <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-bg-page overflow-y-auto">
-        <div className="flex flex-col items-center justify-center min-h-full p-8 text-center w-full max-w-sm mx-auto">
+      <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-bg-page overflow-y-auto pt-[max(1rem,env(safe-area-inset-top))] pb-[max(1rem,env(safe-area-inset-bottom))]">
+        <div className="flex flex-col items-center justify-center min-h-full p-4 sm:p-8 text-center w-full max-w-sm mx-auto">
           <motion.div
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
@@ -123,17 +123,17 @@ export default function SessionScreen({
                 <CheckCircle2 className="w-6 h-6" />
               </div>
               <h2 className="text-3xl font-serif text-deep-forest mb-2">Session Complete</h2>
-              <p className="text-accent-green opacity-70 text-sm">
+              <p className="text-accent-green/80 text-sm">
                 {formatTime(state.elapsedSeconds)} of mindful breathing. How do you feel now?
               </p>
             </div>
-            <div className="bg-card p-6 rounded-[32px] border border-cream shadow-sm w-full">
+            <div className="bg-card p-4 sm:p-6 rounded-[32px] border border-cream shadow-sm w-full">
               <MoodCheck onSelect={(mood) => recordMoodAndEnd(mood)} selectedMood={state.moodAfter} />
             </div>
             <Button
               variant="ghost"
               onClick={() => recordMoodAndEnd(undefined)}
-              className="text-accent-green opacity-50 hover:opacity-100"
+              className="text-accent-green/70 hover:text-accent-green"
             >
               Skip
             </Button>
@@ -144,9 +144,9 @@ export default function SessionScreen({
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex flex-col items-center justify-between p-6 sm:p-8 bg-bg-page overflow-hidden select-none">
+    <div className="fixed inset-0 z-50 flex flex-col items-center justify-between p-4 sm:p-8 pt-[max(1rem,env(safe-area-inset-top))] pb-[max(1.25rem,env(safe-area-inset-bottom))] bg-bg-page overflow-y-auto select-none min-h-[100dvh]">
       {/* Top Navigation Bar */}
-      <div className="w-full flex justify-between items-center flex-shrink-0 max-w-2xl mx-auto">
+      <div className="w-full flex justify-between items-center flex-shrink-0 max-w-2xl mx-auto mb-2">
         <Button
           variant="ghost"
           size="icon"
@@ -158,14 +158,14 @@ export default function SessionScreen({
         </Button>
 
         <div className="flex flex-col items-center">
-          <span className="text-[10px] font-bold text-accent-green uppercase tracking-[2px] opacity-50">
+          <span className="text-[10px] font-bold text-accent-green/70 uppercase tracking-[2px]">
             Mode
           </span>
-          <h2 className="text-xl font-serif text-deep-forest">{config.label}</h2>
+          <h2 className="text-lg sm:text-xl font-serif text-deep-forest">{config.label}</h2>
         </div>
 
         {/* Audio & Playback Controls */}
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1.5 sm:gap-2">
           <Button
             variant="ghost"
             size="icon"
@@ -217,7 +217,7 @@ export default function SessionScreen({
       </div>
 
       {/* Main Focus / Circle Animation */}
-      <div className="flex-1 flex flex-col items-center justify-center gap-6 sm:gap-8 w-full max-w-lg mx-auto overflow-hidden">
+      <div className="flex-1 flex flex-col items-center justify-center gap-3 sm:gap-6 w-full max-w-lg mx-auto py-2">
         <div className="relative flex-shrink-0">
           <BreathingCircle
             config={config}
@@ -230,25 +230,25 @@ export default function SessionScreen({
           />
         </div>
 
-        <div className="text-center w-full flex flex-col items-center gap-4 sm:gap-6">
+        <div className="text-center w-full flex flex-col items-center gap-3 sm:gap-4">
           {/* Phase Indicators */}
           {state.status !== 'preparing' && (
-            <div className="flex justify-center gap-3 sm:gap-4 w-full px-8 sm:px-12">
+            <div className="flex justify-center gap-2 sm:gap-4 w-full px-4 sm:px-12">
               {activePhases.map((p) => {
                 const isCurrent = state.currentPhase === p.phase;
                 const label = p.phase === 'holdPost' ? 'Hold' : p.phase;
                 return (
-                  <div key={p.phase} className="flex flex-col items-center gap-2 flex-1">
+                  <div key={p.phase} className="flex flex-col items-center gap-1.5 flex-1">
                     <div
                       className={`h-1.5 w-full rounded-full transition-all duration-500 ${
                         isCurrent
-                          ? 'bg-accent-green shadow-[0_0_10px_rgba(90,90,64,0.3)]'
-                          : 'bg-cream/20'
+                          ? 'bg-accent-green shadow-[0_0_10px_rgba(36,92,66,0.3)]'
+                          : 'bg-cream/40'
                       }`}
                     />
                     <span
-                      className={`text-[10px] font-bold uppercase tracking-widest transition-opacity capitalize ${
-                        isCurrent ? 'opacity-100 text-accent-green' : 'opacity-30 text-deep-forest'
+                      className={`text-[9px] sm:text-[10px] font-bold uppercase tracking-widest transition-opacity capitalize ${
+                        isCurrent ? 'opacity-100 text-accent-green' : 'opacity-40 text-deep-forest'
                       }`}
                     >
                       {label}
@@ -260,7 +260,7 @@ export default function SessionScreen({
           )}
 
           {/* Current Phase or Warmup Display */}
-          <div className="relative h-28 flex flex-col items-center justify-center">
+          <div className="relative h-20 sm:h-24 flex flex-col items-center justify-center">
             <AnimatePresence mode="wait">
               {state.status === 'preparing' ? (
                 <motion.div
@@ -270,15 +270,15 @@ export default function SessionScreen({
                   exit={{ opacity: 0, scale: 1.1, y: -10 }}
                   className="flex flex-col items-center"
                 >
-                  <span className="text-xs font-bold text-accent-green uppercase tracking-[3px] opacity-60 mb-2">
+                  <span className="text-xs font-bold text-accent-green/80 uppercase tracking-[3px] mb-1">
                     Prepare Yourself
                   </span>
-                  <h2 className="text-5xl sm:text-6xl font-serif italic text-accent-green tracking-tight">
+                  <h2 className="text-4xl sm:text-5xl font-serif italic text-accent-green tracking-tight">
                     {state.warmupCountdown}
                   </h2>
                   <button
                     onClick={skipPrepare}
-                    className="mt-2 text-[10px] font-bold uppercase tracking-wider text-accent-green opacity-40 hover:opacity-100 transition-opacity"
+                    className="mt-1 text-[10px] font-bold uppercase tracking-wider text-accent-green/60 hover:text-accent-green transition-opacity"
                   >
                     Start Now
                   </button>
@@ -291,7 +291,7 @@ export default function SessionScreen({
                   exit={{ opacity: 0, scale: 1.05 }}
                   className="flex flex-col items-center"
                 >
-                  <h2 className="text-4xl font-serif italic text-accent-green mb-2">Paused</h2>
+                  <h2 className="text-3xl sm:text-4xl font-serif italic text-accent-green mb-2">Paused</h2>
                   <Button
                     onClick={resume}
                     size="sm"
@@ -308,10 +308,10 @@ export default function SessionScreen({
                   exit={{ opacity: 0, scale: 1.1, y: -10 }}
                   className="flex flex-col items-center"
                 >
-                  <h2 className="text-5xl sm:text-6xl font-serif italic text-accent-green capitalize mb-2 tracking-tight">
+                  <h2 className="text-4xl sm:text-5xl font-serif italic text-accent-green capitalize mb-1 tracking-tight">
                     {state.currentPhase === 'holdPost' ? 'Hold' : state.currentPhase}
                   </h2>
-                  <div className="text-2xl font-mono text-deep-forest font-bold">
+                  <div className="text-xl sm:text-2xl font-mono text-deep-forest font-bold">
                     {state.phaseCountdown}s
                   </div>
                 </motion.div>
@@ -320,7 +320,7 @@ export default function SessionScreen({
           </div>
 
           {/* Time Tracking */}
-          <div className="flex items-center gap-3 text-xs sm:text-sm font-mono text-deep-forest/50 tracking-[3px] font-light">
+          <div className="flex items-center gap-3 text-xs sm:text-sm font-mono text-deep-forest/60 tracking-[2px] font-light">
             <span>{formatTime(state.elapsedSeconds)}</span>
             <span>/</span>
             <span>{formatTime(state.targetSeconds)}</span>
@@ -334,7 +334,7 @@ export default function SessionScreen({
       </div>
 
       {/* Bottom Actions and Progress Bar */}
-      <div className="w-full max-w-lg mx-auto flex flex-col gap-4 items-center pb-4 flex-shrink-0">
+      <div className="w-full max-w-lg mx-auto flex flex-col gap-3 items-center pb-2 flex-shrink-0">
         <div className="w-full h-1.5 bg-cream/50 rounded-full overflow-hidden">
           <motion.div
             className="h-full bg-accent-green shadow-[0_0_12px_rgba(36,92,66,0.3)] dark:shadow-[0_0_12px_rgba(82,183,136,0.4)] transition-all duration-300"
@@ -347,7 +347,7 @@ export default function SessionScreen({
             <Button
               variant="outline"
               onClick={resume}
-              className="text-xs font-bold text-accent-green border-cream uppercase tracking-[2px] rounded-full px-6 py-3"
+              className="text-xs font-bold text-accent-green border-cream uppercase tracking-[2px] rounded-full px-6 py-2.5"
             >
               Resume
             </Button>
@@ -356,7 +356,7 @@ export default function SessionScreen({
           <Button
             variant="ghost"
             onClick={finish}
-            className="text-xs font-bold text-accent-green uppercase tracking-[2px] opacity-80 hover:opacity-100 transition-all hover:bg-muted rounded-full px-8 py-3"
+            className="text-xs font-bold text-accent-green uppercase tracking-[2px] opacity-80 hover:opacity-100 transition-all hover:bg-muted rounded-full px-6 sm:px-8 py-2.5"
           >
             Finish Session
           </Button>
@@ -371,7 +371,7 @@ export default function SessionScreen({
               initial={{ opacity: 0, scale: 0.95, y: 10 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: 10 }}
-              className="bg-card text-card-foreground rounded-[32px] p-6 sm:p-8 max-w-sm w-full border border-cream shadow-2xl flex flex-col gap-6"
+              className="bg-card text-card-foreground rounded-[32px] p-5 sm:p-8 max-w-sm w-full border border-cream shadow-2xl flex flex-col gap-5 max-h-[90dvh] overflow-y-auto"
             >
               <div className="flex justify-between items-center">
                 <div className="flex items-center gap-2">

@@ -425,7 +425,7 @@ export default function App() {
         </aside>
 
         {/* Main Content Area */}
-        <main className="flex-1 p-6 lg:p-12 pb-24 lg:pb-12 overflow-y-auto">
+        <main className="flex-1 p-4 sm:p-6 lg:p-12 pb-[max(7rem,calc(6rem+env(safe-area-inset-bottom)))] lg:pb-12 overflow-y-auto">
           <AnimatePresence mode="wait">
             {activeTab === 'home' && (
               <div className="max-w-2xl mx-auto">
@@ -736,7 +736,7 @@ export default function App() {
       </div>
 
       {/* Mobile Navigation Bar */}
-      <nav className="lg:hidden fixed bottom-0 left-0 right-0 bg-bg-page/95 dark:bg-card/95 backdrop-blur-lg border-t border-cream/50 px-8 py-4 flex justify-between items-center z-40">
+      <nav className="lg:hidden fixed bottom-0 left-0 right-0 bg-bg-page/95 dark:bg-card/95 backdrop-blur-lg border-t border-cream/50 px-6 sm:px-8 pt-3 pb-[max(1rem,env(safe-area-inset-bottom))] flex justify-between items-center z-40">
         {[
           { id: 'home' as const, label: 'Home', icon: Home },
           { id: 'progress' as const, label: 'Stats', icon: BarChart2 },

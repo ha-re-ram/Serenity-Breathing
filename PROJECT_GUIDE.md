@@ -62,26 +62,26 @@
 
 ## 3. Project Directory Structure
 
-- [components.json](file:///home/ha-re-ram/Codes/Serenity-Breathing/components.json) — shadcn/ui configuration file (base-nova style)
-- [firestore.rules](file:///home/ha-re-ram/Codes/Serenity-Breathing/firestore.rules) — Cloud Firestore security rules & schema validators
-- [index.html](file:///home/ha-re-ram/Codes/Serenity-Breathing/index.html) — Main entrypoint with SEO meta, OpenGraph, JSON-LD schema
-- [package.json](file:///home/ha-re-ram/Codes/Serenity-Breathing/package.json) — Project dependencies and npm scripts
-- [tsconfig.json](file:///home/ha-re-ram/Codes/Serenity-Breathing/tsconfig.json) — TypeScript compiler config with path alias `@/*`
-- [vite.config.ts](file:///home/ha-re-ram/Codes/Serenity-Breathing/vite.config.ts) — Vite config with Tailwind v4 & React plugins, path alias
-- [components/ui/](file:///home/ha-re-ram/Codes/Serenity-Breathing/components/ui/) — shadcn UI primitives: button, card, dialog, drawer, input, label, progress, slider, sonner, tabs
-- [lib/utils.ts](file:///home/ha-re-ram/Codes/Serenity-Breathing/lib/utils.ts) — Shared `cn()` utility (`clsx` + `tailwind-merge`)
-- [public/_headers](file:///home/ha-re-ram/Codes/Serenity-Breathing/public/_headers) — Cloudflare Pages HTTP security headers & strict CSP
-- [public/_redirects](file:///home/ha-re-ram/Codes/Serenity-Breathing/public/_redirects) — SPA redirection rule (`/* /index.html 200`)
-- [public/icon.png](file:///home/ha-re-ram/Codes/Serenity-Breathing/public/icon.png) — App icon & PWA icon
-- [public/manifest.json](file:///home/ha-re-ram/Codes/Serenity-Breathing/public/manifest.json) — Progressive Web App (PWA) manifest
-- [public/robots.txt](file:///home/ha-re-ram/Codes/Serenity-Breathing/public/robots.txt) — Search engine crawler directives
-- [public/sitemap.xml](file:///home/ha-re-ram/Codes/Serenity-Breathing/public/sitemap.xml) — Sitemap for SEO indexing
-- [public/sw.js](file:///home/ha-re-ram/Codes/Serenity-Breathing/public/sw.js) — Service worker for offline asset caching (Cache-First)
-- [src/App.tsx](file:///home/ha-re-ram/Codes/Serenity-Breathing/src/App.tsx) — Root application component, auth flow, realtime data sync
-- [src/firebase.ts](file:///home/ha-re-ram/Codes/Serenity-Breathing/src/firebase.ts) — Firebase app, auth, db init and error handling
-- [src/index.css](file:///home/ha-re-ram/Codes/Serenity-Breathing/src/index.css) — Tailwind CSS v4 `@theme`, brand colors, dark mode tokens
-- [src/main.tsx](file:///home/ha-re-ram/Codes/Serenity-Breathing/src/main.tsx) — React DOM root render with ThemeProvider & Toaster
-- [src/types.ts](file:///home/ha-re-ram/Codes/Serenity-Breathing/src/types.ts) — TypeScript interfaces: `BreathingConfig`, `UserProfile`, `Habit`, `SessionRecord`
+- [components.json](file:///home/ha-re-ram/Projects/Serenity-Breathing/components.json) — shadcn/ui configuration file (base-nova style)
+- [firestore.rules](file:///home/ha-re-ram/Projects/Serenity-Breathing/firestore.rules) — Cloud Firestore security rules & schema validators
+- [index.html](file:///home/ha-re-ram/Projects/Serenity-Breathing/index.html) — Main entrypoint with SEO meta, OpenGraph, JSON-LD schema
+- [package.json](file:///home/ha-re-ram/Projects/Serenity-Breathing/package.json) — Project dependencies and npm scripts
+- [tsconfig.json](file:///home/ha-re-ram/Projects/Serenity-Breathing/tsconfig.json) — TypeScript compiler config with path alias `@/*`
+- [vite.config.ts](file:///home/ha-re-ram/Projects/Serenity-Breathing/vite.config.ts) — Vite config with Tailwind v4 & React plugins, path alias
+- [components/ui/](file:///home/ha-re-ram/Projects/Serenity-Breathing/components/ui/) — shadcn UI primitives: button, card, dialog, drawer, input, label, progress, slider, sonner, tabs
+- [lib/utils.ts](file:///home/ha-re-ram/Projects/Serenity-Breathing/lib/utils.ts) — Shared `cn()` utility (`clsx` + `tailwind-merge`)
+- [public/_headers](file:///home/ha-re-ram/Projects/Serenity-Breathing/public/_headers) — Cloudflare Pages HTTP security headers & strict CSP
+- [public/_redirects](file:///home/ha-re-ram/Projects/Serenity-Breathing/public/_redirects) — SPA redirection rule (`/* /index.html 200`)
+- [public/icon.png](file:///home/ha-re-ram/Projects/Serenity-Breathing/public/icon.png) — App icon & PWA icon
+- [public/manifest.json](file:///home/ha-re-ram/Projects/Serenity-Breathing/public/manifest.json) — Progressive Web App (PWA) manifest
+- [public/robots.txt](file:///home/ha-re-ram/Projects/Serenity-Breathing/public/robots.txt) — Search engine crawler directives
+- [public/sitemap.xml](file:///home/ha-re-ram/Projects/Serenity-Breathing/public/sitemap.xml) — Sitemap for SEO indexing
+- [public/sw.js](file:///home/ha-re-ram/Projects/Serenity-Breathing/public/sw.js) — Service worker for offline asset caching (Cache-First)
+- [src/App.tsx](file:///home/ha-re-ram/Projects/Serenity-Breathing/src/App.tsx) — Root application component, auth flow, realtime data sync
+- [src/firebase.ts](file:///home/ha-re-ram/Projects/Serenity-Breathing/src/firebase.ts) — Firebase app, auth, db init and error handling
+- [src/index.css](file:///home/ha-re-ram/Projects/Serenity-Breathing/src/index.css) — Tailwind CSS v4 `@theme`, brand colors, dark mode tokens
+- [src/main.tsx](file:///home/ha-re-ram/Projects/Serenity-Breathing/src/main.tsx) — React DOM root render with ThemeProvider & Toaster
+- [src/types.ts](file:///home/ha-re-ram/Projects/Serenity-Breathing/src/types.ts) — TypeScript interfaces: `BreathingConfig`, `UserProfile`, `Habit`, `SessionRecord`
 - [src/machines/](file:///home/ha-re-ram/Projects/Serenity-Breathing/src/machines/) — Explicit, type-safe finite state machines and reducers:
   - `breathingSessionMachine.ts` — Breathwork session lifecycle (`preparing` -> `breathing` -> `paused` -> `reflecting` -> `completed`), accurate progress, pause/resume, deduplicated haptics
   - `authFormMachine.ts` — Authentication mode transitions (`signIn` | `signUp` | `forgotPassword`) and submission state
@@ -96,14 +96,14 @@
   - `soundMachine.ts` — Audio engine state machine for voice guidance, Tibetan singing bowl 432Hz chimes, procedural ambient soundscapes, and master mute controls
   - `machines.test.ts` — Native Node/TSX unit test suite for all 11 state machines
 - [src/services/audioEngine.ts](file:///home/ha-re-ram/Projects/Serenity-Breathing/src/services/audioEngine.ts) — Web Audio API procedural sound synthesizer (Zen 432Hz Drone, Ocean Waves, Gentle Rain, Solfeggio bell harmonics) & Web Speech API voice guide
-- [src/constants/quotes.ts](file:///home/ha-re-ram/Codes/Serenity-Breathing/src/constants/quotes.ts) — Curated list of mindfulness quotes & random picker
-- [src/components/AuthScreen.tsx](file:///home/ha-re-ram/Codes/Serenity-Breathing/src/components/AuthScreen.tsx) — Login, Registration & Password Reset screen
-- [src/components/BreathingCircle.tsx](file:///home/ha-re-ram/Codes/Serenity-Breathing/src/components/BreathingCircle.tsx) — Animated SVG/Framer circle with phase dilation & haptics
-- [src/components/HomeScreen.tsx](file:///home/ha-re-ram/Codes/Serenity-Breathing/src/components/HomeScreen.tsx) — Main dashboard: daily quote, mood check, duration, modes
-- [src/components/MoodCheck.tsx](file:///home/ha-re-ram/Codes/Serenity-Breathing/src/components/MoodCheck.tsx) — 5-stage emotional check-in component (anxious to happy)
-- [src/components/OnboardingModal.tsx](file:///home/ha-re-ram/Codes/Serenity-Breathing/src/components/OnboardingModal.tsx) — First-time user onboarding modal (reminder + cycle)
-- [src/components/ProgressScreen.tsx](file:///home/ha-re-ram/Codes/Serenity-Breathing/src/components/ProgressScreen.tsx) — Analytics, streaks, weekly bar charts, habit tracker, achievements
-- [src/components/SessionScreen.tsx](file:///home/ha-re-ram/Codes/Serenity-Breathing/src/components/SessionScreen.tsx) — Active breathwork screen, countdown timer, phase stepper
+- [src/constants/quotes.ts](file:///home/ha-re-ram/Projects/Serenity-Breathing/src/constants/quotes.ts) — Curated list of mindfulness quotes & random picker
+- [src/components/AuthScreen.tsx](file:///home/ha-re-ram/Projects/Serenity-Breathing/src/components/AuthScreen.tsx) — Login, Registration & Password Reset screen
+- [src/components/BreathingCircle.tsx](file:///home/ha-re-ram/Projects/Serenity-Breathing/src/components/BreathingCircle.tsx) — Animated SVG/Framer circle with phase dilation & haptics
+- [src/components/HomeScreen.tsx](file:///home/ha-re-ram/Projects/Serenity-Breathing/src/components/HomeScreen.tsx) — Main dashboard: daily quote, mood check, duration, modes
+- [src/components/MoodCheck.tsx](file:///home/ha-re-ram/Projects/Serenity-Breathing/src/components/MoodCheck.tsx) — 5-stage emotional check-in component (anxious to happy)
+- [src/components/OnboardingModal.tsx](file:///home/ha-re-ram/Projects/Serenity-Breathing/src/components/OnboardingModal.tsx) — First-time user onboarding modal (reminder + cycle)
+- [src/components/ProgressScreen.tsx](file:///home/ha-re-ram/Projects/Serenity-Breathing/src/components/ProgressScreen.tsx) — Analytics, streaks, weekly bar charts, habit tracker, achievements
+- [src/components/SessionScreen.tsx](file:///home/ha-re-ram/Projects/Serenity-Breathing/src/components/SessionScreen.tsx) — Active breathwork screen, countdown timer, phase stepper
 
 
 ---
@@ -208,7 +208,7 @@
 
 ## 6. Data Models & Database Schema (Cloud Firestore)
 
-All types are strictly defined in [`src/types.ts`](file:///home/ha-re-ram/Codes/Serenity-Breathing/src/types.ts).
+All types are strictly defined in [`src/types.ts`](file:///home/ha-re-ram/Projects/Serenity-Breathing/src/types.ts).
 
 ### 6.1 Collection: `users`
 - **Document ID**: `userId` (Firebase Auth UID)
@@ -266,7 +266,7 @@ box:     { inhale: 4, hold: 4, exhale: 4, holdPost: 4, label: 'Box',     color: 
 
 ## 7. Security Rules & Data Validation
 
-Firestore rules are defined in [`firestore.rules`](file:///home/ha-re-ram/Codes/Serenity-Breathing/firestore.rules).
+Firestore rules are defined in [`firestore.rules`](file:///home/ha-re-ram/Projects/Serenity-Breathing/firestore.rules).
 Key security policies:
 1. **Ownership Isolation**: A user can only read, create, or update documents where `request.auth.uid == userId` or `request.resource.data.uid == request.auth.uid`.
 2. **Strict Schema Constraints**:
@@ -281,7 +281,7 @@ Key security policies:
 
 ## 8. Design System, Theme & UI Conventions
 
-The project uses **Tailwind CSS v4** with a custom color palette tailored for calming mindfulness. Configured in [`src/index.css`](file:///home/ha-re-ram/Codes/Serenity-Breathing/src/index.css):
+The project uses **Tailwind CSS v4** with a custom color palette tailored for calming mindfulness. Configured in [`src/index.css`](file:///home/ha-re-ram/Projects/Serenity-Breathing/src/index.css):
 
 ### 8.1 Palette Tokens
 
@@ -309,7 +309,7 @@ The project uses **Tailwind CSS v4** with a custom color palette tailored for ca
 
 ### 9.1 The Interval Stale-Closure Bug
 **Problem**: In React, if an interval callback relies on state variables (`phase`, `countdown`), the interval either captures stale values or must be re-instantiated every single second. Re-instantiating every second can cause drift, skipped seconds, or audio/haptic jitter.  
-**Solution**: [`SessionScreen.tsx`](file:///home/ha-re-ram/Codes/Serenity-Breathing/src/components/SessionScreen.tsx) uses `phaseRef` and `phaseCountdownRef`. The `setInterval` runs continuously without restarting, reading and mutating the ref values synchronously while pushing updates to state only for rendering.
+**Solution**: [`SessionScreen.tsx`](file:///home/ha-re-ram/Projects/Serenity-Breathing/src/components/SessionScreen.tsx) uses `phaseRef` and `phaseCountdownRef`. The `setInterval` runs continuously without restarting, reading and mutating the ref values synchronously while pushing updates to state only for rendering.
 
 ### 9.2 Firestore Write Debounce
 **Problem**: Sliders or input fields that update Firestore on change will flood the database with dozens of writes per second, hitting rate limits and running up costs.  
@@ -335,7 +335,7 @@ All core interactive flows that previously relied on implicit, scattered boolean
 ## 10. Developer Playbooks (How to Make Changes)
 
 ### Playbook A: Adding a New Breathing Mode
-1. Open [`src/types.ts`](file:///home/ha-re-ram/Codes/Serenity-Breathing/src/types.ts):
+1. Open [`src/types.ts`](file:///home/ha-re-ram/Projects/Serenity-Breathing/src/types.ts):
    - Add the mode key to `BreathingMode` type:
      ```typescript
      export type BreathingMode = 'calm' | 'focus' | 'sleep' | 'morning' | 'power' | 'box' | 'your_new_mode';
@@ -352,7 +352,7 @@ All core interactive flows that previously relied on implicit, scattered boolean
        color: 'bg-soft-sage',
      },
      ```
-2. Open [`firestore.rules`](file:///home/ha-re-ram/Codes/Serenity-Breathing/firestore.rules):
+2. Open [`firestore.rules`](file:///home/ha-re-ram/Projects/Serenity-Breathing/firestore.rules):
    - In `isValidSession(data)`, add `'your_new_mode'` to the allowed mode array:
      ```javascript
      data.mode in ['calm', 'focus', 'sleep', 'morning', 'power', 'box', 'your_new_mode']
@@ -362,13 +362,13 @@ All core interactive flows that previously relied on implicit, scattered boolean
 ---
 
 ### Playbook B: Adding a New Health Metric or User Profile Field
-1. Open [`src/types.ts`](file:///home/ha-re-ram/Codes/Serenity-Breathing/src/types.ts):
+1. Open [`src/types.ts`](file:///home/ha-re-ram/Projects/Serenity-Breathing/src/types.ts):
    - Add the new field to `UserProfile['healthDetails']` or root `UserProfile`.
-2. Open [`src/App.tsx`](file:///home/ha-re-ram/Codes/Serenity-Breathing/src/App.tsx):
+2. Open [`src/App.tsx`](file:///home/ha-re-ram/Projects/Serenity-Breathing/src/App.tsx):
    - If user-editable, add an input field in the Profile/Settings tab or hook up `handleUpdateHealthDetails`.
-3. Open [`src/components/ProgressScreen.tsx`](file:///home/ha-re-ram/Codes/Serenity-Breathing/src/components/ProgressScreen.tsx):
+3. Open [`src/components/ProgressScreen.tsx`](file:///home/ha-re-ram/Projects/Serenity-Breathing/src/components/ProgressScreen.tsx):
    - Display the new metric in the Health Summary grid.
-4. Open [`firestore.rules`](file:///home/ha-re-ram/Codes/Serenity-Breathing/firestore.rules):
+4. Open [`firestore.rules`](file:///home/ha-re-ram/Projects/Serenity-Breathing/firestore.rules):
    - Verify that `isValidUser(data)` doesn't reject the new key.
 5. Update this `PROJECT_GUIDE.md` under [6.1 Collection: users](#61-collection-users) and record in [Section 12](#12-project-change-log--maintenance-record).
 
@@ -384,7 +384,7 @@ All core interactive flows that previously relied on implicit, scattered boolean
 ## 11. Deployment, PWA & Environment Variables
 
 ### 11.1 Environment Variables
-Create a `.env` file based on [`.env.example`](file:///home/ha-re-ram/Codes/Serenity-Breathing/.env.example):
+Create a `.env` file based on [`.env.example`](file:///home/ha-re-ram/Projects/Serenity-Breathing/.env.example):
 ```bash
 VITE_FIREBASE_API_KEY="your-api-key"
 VITE_FIREBASE_AUTH_DOMAIN="your-project.firebaseapp.com"
@@ -409,8 +409,8 @@ npm run clean    # Removes dist folder
 ### 11.3 Cloudflare Pages Deployment
 - **Build Command**: `npm run build`
 - **Build Output Directory**: `dist`
-- **Headers & CSP**: [`public/_headers`](file:///home/ha-re-ram/Codes/Serenity-Breathing/public/_headers) enforces strict Content-Security-Policy. If you include assets or APIs from external domains, they **must** be whitelisted in `_headers`.
-- **SPA Routing**: [`public/_redirects`](file:///home/ha-re-ram/Codes/Serenity-Breathing/public/_redirects) directs all traffic to `/index.html`.
+- **Headers & CSP**: [`public/_headers`](file:///home/ha-re-ram/Projects/Serenity-Breathing/public/_headers) enforces strict Content-Security-Policy. If you include assets or APIs from external domains, they **must** be whitelisted in `_headers`.
+- **SPA Routing**: [`public/_redirects`](file:///home/ha-re-ram/Projects/Serenity-Breathing/public/_redirects) directs all traffic to `/index.html`.
 
 ---
 
