@@ -255,6 +255,11 @@ export function useAuthSyncMachine({ authInstance, dbInstance, onError }: UseAut
       return;
     }
 
+    // If Firebase Auth already resolved currentUser in memory, resolve immediately
+    if (authInstance.currentUser) {
+      dispatch({ type: 'AUTH_RESOLVED', user: authInstance.currentUser });
+    }
+
     const unsubscribe = onAuthStateChanged(authInstance, (firebaseUser) => {
       if (firebaseUser) {
         dispatch({ type: 'AUTH_RESOLVED', user: firebaseUser });
@@ -268,7 +273,7 @@ export function useAuthSyncMachine({ authInstance, dbInstance, onError }: UseAut
       }
     });
 
-    // 3s safety fallback in case Firebase Auth connection hangs
+    // 800ms safety fallback in case Firebase Auth connection hangs
     const safetyTimer = setTimeout(() => {
       if (stateRef.current.status === 'initializing') {
         const u = authInstance.currentUser || null;
@@ -283,7 +288,7 @@ export function useAuthSyncMachine({ authInstance, dbInstance, onError }: UseAut
           });
         }
       }
-    }, 3000);
+    }, 800);
 
     return () => {
       unsubscribe();

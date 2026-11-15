@@ -28,6 +28,7 @@ import SessionScreen from './components/SessionScreen';
 import ProgressScreen from './components/ProgressScreen';
 import AuthScreen from './components/AuthScreen';
 import OnboardingModal from './components/OnboardingModal';
+import ErrorBoundary from './components/ErrorBoundary';
 import {
   useAuthSyncMachine,
   useAppNavigationMachine,
@@ -767,13 +768,15 @@ export default function App() {
             transition={{ type: 'spring', damping: 25, stiffness: 200 }}
             className="fixed inset-0 z-50 bg-bg-page"
           >
-            <SessionScreen
-              mode={activeSession}
-              customConfig={profile?.customBreathingConfig}
-              targetDurationMinutes={selectedDuration}
-              onEnd={endSession}
-              onCancel={dismissSession}
-            />
+            <ErrorBoundary fallbackTitle="Session Error" onReset={dismissSession}>
+              <SessionScreen
+                mode={activeSession}
+                customConfig={profile?.customBreathingConfig}
+                targetDurationMinutes={selectedDuration}
+                onEnd={endSession}
+                onCancel={dismissSession}
+              />
+            </ErrorBoundary>
           </motion.div>
         )}
       </AnimatePresence>

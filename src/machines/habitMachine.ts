@@ -14,7 +14,8 @@ export interface HabitEvaluation {
  * Pure evaluation function for a habit's daily state.
  */
 export function evaluateHabit(habit: Habit, referenceDate: Date = new Date()): HabitEvaluation {
-  const lastDate = habit.lastCompletedDate ? new Date(habit.lastCompletedDate) : null;
+  const parsedDate = habit.lastCompletedDate ? new Date(habit.lastCompletedDate) : null;
+  const lastDate = parsedDate && !isNaN(parsedDate.getTime()) ? parsedDate : null;
 
   if (lastDate && isSameDay(lastDate, referenceDate)) {
     return {

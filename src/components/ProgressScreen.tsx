@@ -29,7 +29,14 @@ export default function ProgressScreen({
   const last7Days = Array.from({ length: 7 }, (_, i) => subDays(new Date(), 6 - i));
 
   const getSessionsForDay = (date: Date) => {
-    return sessions.filter((s) => isSameDay(new Date(s.timestamp), date)).length;
+    return sessions.filter((s) => {
+      try {
+        const d = new Date(s.timestamp);
+        return !isNaN(d.getTime()) && isSameDay(d, date);
+      } catch {
+        return false;
+      }
+    }).length;
   };
 
   const totalMinutes = Math.round(sessions.reduce((acc, s) => acc + s.duration, 0) / 60);
@@ -61,7 +68,9 @@ export default function ProgressScreen({
             <div className="flex items-center gap-1.5">
               <span className="text-2xl font-bold text-deep-forest">{userProfile?.currentStreak || 0}</span>
               {streakEvaluation.isCompletedToday && (
-                <CheckCircle2 className="w-4 h-4 text-accent-green" title="Streak active today" />
+                <span title="Streak active today">
+                  <CheckCircle2 className="w-4 h-4 text-accent-green" />
+                </span>
               )}
             </div>
             <span className="text-[10px] font-bold text-accent-green/80 uppercase tracking-[1px]">
@@ -404,7 +413,14 @@ export default function ProgressScreen({
                     <div>
                       <h4 className="font-bold text-deep-forest capitalize">{session.mode} Session</h4>
                       <p className="text-xs text-accent-green/80">
-                        {format(new Date(session.timestamp), 'MMM d, h:mm a')} • {Math.round(session.duration / 60)} min
+                        {(() => {
+                          try {
+                            const d = new Date(session.timestamp);
+                            return !isNaN(d.getTime()) ? format(d, 'MMM d, h:mm a') : 'Recent';
+                          } catch {
+                            return 'Recent';
+                          }
+                        })()} • {Math.round(session.duration / 60)} min
                       </p>
                     </div>
                   </div>

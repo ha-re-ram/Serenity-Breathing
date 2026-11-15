@@ -90,6 +90,23 @@ test('Breathing Session Machine: Warmup and Phase Cycling', () => {
   state = breathingSessionReducer(state, { type: 'RECORD_MOOD', mood: 'calm' }, activePhases);
   assert.equal(state.status, 'completed');
   assert.equal(state.moodAfter, 'calm');
+
+  // Resilience: TICK with empty activePhases should safely fall back and never throw
+  let emptyPhasesState: BreathingSessionState = {
+    status: 'breathing',
+    currentPhase: 'inhale',
+    phaseCountdown: 1,
+    phaseDuration: 4,
+    warmupCountdown: 0,
+    elapsedSeconds: 5,
+    targetSeconds: 60,
+    completedCycles: 0,
+    targetReached: false,
+  };
+  assert.doesNotThrow(() => {
+    emptyPhasesState = breathingSessionReducer(emptyPhasesState, { type: 'TICK' }, []);
+  });
+  assert.ok(emptyPhasesState.currentPhase, 'Current phase must stay valid even with empty phases');
 });
 
 test('Auth Form Machine: Mode Transitions and Error Clearing', () => {
@@ -225,6 +242,19 @@ test('Habit Machine: State Evaluations and Streak Transitions', () => {
 
   const toggledBroken = toggleHabitCompletion(brokenHabit, now);
   assert.equal(toggledBroken.streak, 1);
+
+  // Resilience: Malformed lastCompletedDate should not throw RangeError
+  const malformedHabit: Habit = {
+    id: '4',
+    name: 'Yoga',
+    streak: 2,
+    lastCompletedDate: 'not-a-valid-date-string',
+    createdAt: now.toISOString(),
+  };
+  assert.doesNotThrow(() => {
+    const res = evaluateHabit(malformedHabit, now);
+    assert.equal(res.status, 'due');
+  });
 });
 
 test('Session Streak Machine: Daily Practice Evaluation and Transitions', () => {

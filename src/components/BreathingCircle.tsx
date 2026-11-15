@@ -24,25 +24,28 @@ export default function BreathingCircle({ config, isActive, phase, isPaused = fa
     return 0;
   })();
 
+  const safeDuration = Math.max(0.1, Number(currentDuration) || 1.5);
+  const safeScale = Math.max(0.5, Number(getScale()) || 1);
+
   return (
     <div className="relative flex items-center justify-center w-48 h-48 sm:w-60 sm:h-60">
       {/* Outer Dashed Border */}
       <motion.div
         animate={{
-          scale: getScale() * 1.15,
+          scale: safeScale * 1.15,
           opacity: isPaused ? 0.15 : 0.3,
         }}
-        transition={{ duration: currentDuration, ease: "easeInOut" }}
+        transition={{ duration: safeDuration, ease: "easeInOut" }}
         className="absolute inset-0 rounded-full border border-dashed border-soft-sage"
       />
 
       {/* Main Circle */}
       <motion.div
         animate={{
-          scale: getScale(),
+          scale: safeScale,
           opacity: isPaused ? 0.75 : 1,
         }}
-        transition={{ duration: currentDuration, ease: "easeInOut" }}
+        transition={{ duration: safeDuration, ease: "easeInOut" }}
         className={`w-36 h-36 sm:w-44 sm:h-44 rounded-full shadow-2xl flex items-center justify-center ${config.color} text-white relative overflow-hidden transition-colors duration-700`}
       >
         <div className={`absolute inset-0 bg-white/10 ${isPaused ? '' : 'animate-pulse'}`} />

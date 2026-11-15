@@ -63,9 +63,13 @@ export function breathingSessionReducer(
   switch (event.type) {
     case 'PREPARE_TICK': {
       if (state.status !== 'preparing') return state;
+      const phases = activePhases && activePhases.length > 0
+        ? activePhases
+        : [{ phase: 'inhale' as SessionPhase, duration: 4 }, { phase: 'exhale' as SessionPhase, duration: 4 }];
+      const firstPhase = phases[0] || { phase: 'inhale' as SessionPhase, duration: 4 };
+
       if (state.warmupCountdown <= 1) {
         // Transition from preparing to active breathing
-        const firstPhase = activePhases[0] || { phase: 'inhale', duration: 4 };
         return {
           ...state,
           status: 'breathing',
@@ -83,7 +87,11 @@ export function breathingSessionReducer(
 
     case 'SKIP_PREPARE': {
       if (state.status !== 'preparing') return state;
-      const firstPhase = activePhases[0] || { phase: 'inhale', duration: 4 };
+      const phases = activePhases && activePhases.length > 0
+        ? activePhases
+        : [{ phase: 'inhale' as SessionPhase, duration: 4 }, { phase: 'exhale' as SessionPhase, duration: 4 }];
+      const firstPhase = phases[0] || { phase: 'inhale' as SessionPhase, duration: 4 };
+
       return {
         ...state,
         status: 'breathing',
@@ -102,10 +110,13 @@ export function breathingSessionReducer(
       const nextCountdown = state.phaseCountdown - 1;
 
       if (nextCountdown <= 0) {
-        // Phase transition
-        const currentIndex = activePhases.findIndex((p) => p.phase === state.currentPhase);
-        const nextIndex = (currentIndex + 1) % activePhases.length;
-        const nextPhaseConfig = activePhases[nextIndex];
+        // Phase transition with complete safety fallback
+        const phases = activePhases && activePhases.length > 0
+          ? activePhases
+          : [{ phase: 'inhale' as SessionPhase, duration: 4 }, { phase: 'exhale' as SessionPhase, duration: 4 }];
+        const currentIndex = phases.findIndex((p) => p.phase === state.currentPhase);
+        const nextIndex = currentIndex >= 0 ? (currentIndex + 1) % phases.length : 0;
+        const nextPhaseConfig = phases[nextIndex] || phases[0] || { phase: 'inhale' as SessionPhase, duration: 4 };
         const isCycleComplete = nextIndex === 0;
 
         return {
