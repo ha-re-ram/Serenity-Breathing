@@ -48,6 +48,9 @@ web_modules/
 # TypeScript v1 declaration files
 typings/
 
+# Browser Automation & Responsive Screenshots
+screenshots/
+
 # TypeScript cache
 *.tsbuildinfo
 
