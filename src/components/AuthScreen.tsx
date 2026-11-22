@@ -1,5 +1,5 @@
-import { FormEvent } from 'react';
-import { WifiOff, X } from 'lucide-react';
+import { FormEvent, useState } from 'react';
+import { WifiOff, X, Eye, EyeOff } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -19,6 +19,7 @@ export interface AuthScreenProps {
 }
 
 export default function AuthScreen({ onClose, onSuccess }: AuthScreenProps = {}) {
+  const [showPassword, setShowPassword] = useState(false);
   const {
     state,
     switchMode,
@@ -219,15 +220,26 @@ export default function AuthScreen({ onClose, onSuccess }: AuthScreenProps = {})
                       </button>
                     )}
                   </div>
-                  <Input
-                    id="password"
-                    type="password"
-                    placeholder="Enter your password"
-                    value={state.password}
-                    onChange={(e) => setField('password', e.target.value)}
-                    className="h-12 rounded-2xl border-cream bg-bg-page/40 text-deep-forest"
-                    disabled={isSubmitting}
-                  />
+                  <div className="relative">
+                    <Input
+                      id="password"
+                      type={showPassword ? 'text' : 'password'}
+                      placeholder="Enter your password"
+                      value={state.password}
+                      onChange={(e) => setField('password', e.target.value)}
+                      className="h-12 rounded-2xl border-cream bg-bg-page/40 text-deep-forest pr-11"
+                      disabled={isSubmitting}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="absolute right-3.5 top-1/2 -translate-y-1/2 text-accent-green/60 hover:text-accent-green p-1 rounded-lg transition-colors"
+                      aria-label={showPassword ? 'Hide password' : 'Show password'}
+                      title={showPassword ? 'Hide password' : 'Show password'}
+                    >
+                      {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                    </button>
+                  </div>
                 </div>
                 <Button
                   type="submit"

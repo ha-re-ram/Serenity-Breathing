@@ -1,7 +1,7 @@
 import { useReducer, useEffect, useCallback } from 'react';
 import { getRandomQuote } from '../constants/quotes';
 
-export type QuoteStatus = 'loading' | 'ready';
+export type QuoteStatus = 'loading' | 'ready' | 'refreshing';
 
 export interface QuoteState {
   status: QuoteStatus;
@@ -10,6 +10,8 @@ export interface QuoteState {
 
 export type QuoteEvent =
   | { type: 'LOAD_QUOTE'; quote: string }
+  | { type: 'REFRESH_START' }
+  | { type: 'REFRESH_SUCCESS'; quote: string }
   | { type: 'REFRESH_QUOTE' };
 
 export const initialQuoteState: QuoteState = {
@@ -20,6 +22,18 @@ export const initialQuoteState: QuoteState = {
 export function quoteReducer(state: QuoteState, event: QuoteEvent): QuoteState {
   switch (event.type) {
     case 'LOAD_QUOTE':
+      return {
+        status: 'ready',
+        quote: event.quote,
+      };
+
+    case 'REFRESH_START':
+      return {
+        ...state,
+        status: 'refreshing',
+      };
+
+    case 'REFRESH_SUCCESS':
       return {
         status: 'ready',
         quote: event.quote,
@@ -44,12 +58,17 @@ export function useQuoteMachine() {
   }, []);
 
   const refreshQuote = useCallback(() => {
-    dispatch({ type: 'REFRESH_QUOTE' });
+    dispatch({ type: 'REFRESH_START' });
+    const timer = setTimeout(() => {
+      dispatch({ type: 'REFRESH_SUCCESS', quote: getRandomQuote() });
+    }, 250);
+    return () => clearTimeout(timer);
   }, []);
 
   return {
     quote: state.quote,
     isLoading: state.status === 'loading',
+    isRefreshing: state.status === 'refreshing',
     refreshQuote,
   };
 }

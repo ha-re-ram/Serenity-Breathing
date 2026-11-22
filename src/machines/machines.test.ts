@@ -450,6 +450,15 @@ test('Quote Machine: Loading and Refresh Cycling', () => {
   assert.equal(state.status, 'ready');
   assert.equal(state.quote, 'Peace comes from within.');
 
+  // Test refreshing transitions
+  state = quoteReducer(state, { type: 'REFRESH_START' });
+  assert.equal(state.status, 'refreshing');
+  assert.equal(state.quote, 'Peace comes from within.');
+
+  state = quoteReducer(state, { type: 'REFRESH_SUCCESS', quote: 'Breathe in tranquility.' });
+  assert.equal(state.status, 'ready');
+  assert.equal(state.quote, 'Breathe in tranquility.');
+
   state = quoteReducer(state, { type: 'REFRESH_QUOTE' });
   assert.equal(state.status, 'ready');
   assert.ok(state.quote.length > 0);

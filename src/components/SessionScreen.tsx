@@ -395,6 +395,9 @@ export default function SessionScreen({
                   </div>
                   <button
                     type="button"
+                    role="switch"
+                    aria-checked={voiceEnabled}
+                    aria-label="Toggle voice guidance"
                     onClick={() => setVoiceEnabled(!voiceEnabled)}
                     className={`w-12 h-7 rounded-full p-1 transition-colors ${
                       voiceEnabled ? 'bg-accent-green' : 'bg-cream/40'
@@ -415,6 +418,9 @@ export default function SessionScreen({
                   </div>
                   <button
                     type="button"
+                    role="switch"
+                    aria-checked={bellEnabled}
+                    aria-label="Toggle singing bowl chime"
                     onClick={() => setBellEnabled(!bellEnabled)}
                     className={`w-12 h-7 rounded-full p-1 transition-colors ${
                       bellEnabled ? 'bg-accent-green' : 'bg-cream/40'
@@ -444,6 +450,9 @@ export default function SessionScreen({
                     <button
                       key={s.id}
                       type="button"
+                      role="radio"
+                      aria-checked={ambientSound === s.id}
+                      aria-label={s.label}
                       onClick={() => setAmbientSound(s.id)}
                       className={`p-3 rounded-2xl border text-xs font-bold text-left transition-all flex items-center justify-between ${
                         ambientSound === s.id
@@ -473,6 +482,7 @@ export default function SessionScreen({
                     max="1"
                     step="0.05"
                     value={ambientVolume}
+                    aria-label="Ambience volume"
                     onChange={(e) => setAmbientVolume(parseFloat(e.target.value))}
                     className="w-full accent-accent-green cursor-pointer"
                   />

@@ -24,7 +24,7 @@ export default function HomeScreen({
   onDurationChange,
   selectedDuration,
 }: HomeScreenProps) {
-  const { quote, isLoading: loadingQuote, refreshQuote } = useQuoteMachine();
+  const { quote, isLoading: loadingQuote, isRefreshing, refreshQuote } = useQuoteMachine();
   const streakEvaluation = evaluateSessionStreak(userProfile);
 
   return (
@@ -79,11 +79,12 @@ export default function HomeScreen({
           <button
             type="button"
             onClick={refreshQuote}
-            className="p-1.5 text-accent-green/70 hover:text-accent-green hover:bg-muted rounded-lg transition-all"
+            disabled={loadingQuote || isRefreshing}
+            className="p-1.5 text-accent-green/70 hover:text-accent-green hover:bg-muted rounded-lg transition-all disabled:opacity-50"
             title="Inspire me again"
             aria-label="Get another inspiration quote"
           >
-            <RefreshCw className="w-3.5 h-3.5" />
+            <RefreshCw className={`w-3.5 h-3.5 transition-transform ${isRefreshing ? 'animate-spin text-accent-green' : ''}`} />
           </button>
         </CardContent>
       </Card>

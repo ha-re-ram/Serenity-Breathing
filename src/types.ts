@@ -110,3 +110,26 @@ export interface SessionRecord {
   moodBefore?: string;
   moodAfter?: string;
 }
+
+export interface MoodMeta {
+  id: string;
+  label: string;
+  emoji: string;
+}
+
+export const MOOD_DEFINITIONS: Record<string, MoodMeta> = {
+  calm: { id: 'calm', label: 'Calm', emoji: '😌' },
+  relaxed: { id: 'relaxed', label: 'Relaxed', emoji: '🌿' },
+  focused: { id: 'focused', label: 'Focused', emoji: '🎯' },
+  happy: { id: 'happy', label: 'Happy', emoji: '💛' },
+  energized: { id: 'energized', label: 'Energized', emoji: '⚡' },
+  anxious: { id: 'anxious', label: 'Anxious', emoji: '🌧️' },
+  stressed: { id: 'stressed', label: 'Stressed', emoji: '🌪️' },
+  tired: { id: 'tired', label: 'Tired', emoji: '🌙' },
+};
+
+export function getMoodEmoji(mood?: string): string {
+  if (!mood) return '🌿';
+  return MOOD_DEFINITIONS[mood.toLowerCase()]?.emoji || '🌿';
+}
+

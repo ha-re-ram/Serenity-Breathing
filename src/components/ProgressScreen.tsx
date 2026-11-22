@@ -3,7 +3,7 @@ import { TrendingUp, Award, Clock, Calendar as CalendarIcon, Plus, Check, Trash2
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { UserProfile, SessionRecord } from '../types';
+import { UserProfile, SessionRecord, getMoodEmoji } from '../types';
 import { format, subDays, isSameDay } from 'date-fns';
 import { useState } from 'react';
 import { evaluateHabit } from '../machines/habitMachine';
@@ -341,7 +341,9 @@ export default function ProgressScreen({
                         variant="ghost"
                         size="icon"
                         onClick={() => onDeleteHabit(habit.id)}
-                        className="opacity-0 group-hover:opacity-100 text-rose-500 hover:text-rose-600 hover:bg-rose-500/10 rounded-xl transition-all"
+                        aria-label={`Delete habit ${habit.name}`}
+                        title={`Delete habit ${habit.name}`}
+                        className="opacity-70 sm:opacity-0 sm:group-hover:opacity-100 text-rose-500 hover:text-rose-600 hover:bg-rose-500/10 rounded-xl transition-all"
                       >
                         <Trash2 className="w-4 h-4" />
                       </Button>
@@ -426,11 +428,7 @@ export default function ProgressScreen({
                   </div>
                   {session.moodAfter && (
                     <div className="text-xl" title={`Mood after: ${session.moodAfter}`}>
-                      {session.moodAfter === 'calm' && '😌'}
-                      {session.moodAfter === 'focused' && '🎯'}
-                      {session.moodAfter === 'relaxed' && '🌿'}
-                      {session.moodAfter === 'energized' && '⚡'}
-                      {session.moodAfter === 'sleepy' && '😴'}
+                      {getMoodEmoji(session.moodAfter)}
                     </div>
                   )}
                 </CardContent>
