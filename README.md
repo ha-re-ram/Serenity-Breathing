@@ -15,8 +15,8 @@
 ## ✨ Features (v1.3.1 Professional)
 
 - **🌿 Instant Access (Zero-Login Public Sanctuary)**:
-  - Practice immediately without creating an account or hitting paywalls.
-  - All sessions, habit streaks, and custom breathing cycles persist safely in local storage, with optional Cloud Sync in the Profile tab.
+  - Practice immediately without creating an account, passwords, or hitting paywalls.
+  - All sessions, habit streaks, health metrics, and custom breathing cycles persist safely and privately on your device.
 - **🎯 Scientifically Proven Breathing Patterns**:
   - **Calm (4-4)**: Simple autonomic nervous system regulation.
   - **Box Breathing (4-4-4-4)**: Navy SEAL focus technique for high-stress clarity.
@@ -38,8 +38,8 @@
   - Mindful, non-judgmental BMI and health status evaluations.
   - Bidirectional habit streaks with undo capabilities.
   - Pre- and post-session mood shift reflections.
-- **⚡ 11 Pure Finite State Machines**:
-  - Rock-solid session lifecycles, debounced Firestore persistence, and error recoveries under `src/machines/` verified by native unit tests.
+- **⚡ 10 Pure Finite State Machines**:
+  - Rock-solid session lifecycles, debounced local persistence, and error recoveries under `src/machines/` verified by native unit tests.
 - **🔍 Search-First SEO**:
   - Rich JSON-LD schemas (`WebApplication`, `FAQPage`, `HowTo`) and prerendered semantic fallback.
 
@@ -55,7 +55,7 @@
 | **State Machines** | Pure TypeScript Reducers (`src/machines/`) | Explicit state graphs eliminating impossible UI states |
 | **Audio Synthesis** | Web Audio API & Web Speech API | Procedural soundscapes and synthesized vocal cues |
 | **Animation** | [Motion (Framer)](https://motion.dev/) | Smooth responsive breath scaling and spring transitions |
-| **Database & Auth** | [Firebase SDK](https://firebase.google.com/) | Cloud Firestore synchronization & Firebase Auth |
+| **Local Persistence** | Web Storage API & Pure Reducers (`src/machines/`) | Fast, private, 100% offline persistence with zero sign-in required |
 | **Icons & Typography** | [Lucide React](https://lucide.dev/) / Geist Variable | Clean iconography and typography |
 
 📖 **Developer & Architecture Single Source of Truth**: See [PROJECT_GUIDE.md](file:///home/ha-re-ram/Projects/Serenity-Breathing/PROJECT_GUIDE.md) for full database schemas, state machine transition diagrams, playbooks, and change records.
@@ -67,7 +67,7 @@
 ```bash
 npm install       # Install dependencies cleanly
 npm run dev       # Start Vite dev server on port 3000
-npm test          # Run native TSX state machine unit test suite (11/11 pass)
+npm test          # Run native TSX state machine unit test suite (10/10 pass)
 npm run lint      # Run TypeScript typecheck (tsc --noEmit)
 npm run build     # Compile production bundle to dist/
 npm run preview   # Preview production build locally

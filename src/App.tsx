@@ -1,7 +1,4 @@
 import { useCallback, useState, useEffect } from 'react';
-import { auth, db, handleFirestoreError, OperationType } from './firebase';
-import { updateProfile } from 'firebase/auth';
-import { doc, setDoc, collection, addDoc } from 'firebase/firestore';
 import { Toaster, toast } from 'sonner';
 import { motion, AnimatePresence } from 'motion/react';
 import { useTheme } from 'next-themes';
@@ -9,15 +6,11 @@ import {
   Home,
   BarChart2,
   Bell,
-  LogOut,
   User as UserIcon,
   Moon,
   Sun,
   Sparkles,
-  Cloud,
   CheckCircle2,
-  LogIn,
-  ShieldCheck,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -26,32 +19,31 @@ import { Input } from '@/components/ui/input';
 import HomeScreen from './components/HomeScreen';
 import SessionScreen from './components/SessionScreen';
 import ProgressScreen from './components/ProgressScreen';
-import AuthScreen from './components/AuthScreen';
 import OnboardingModal from './components/OnboardingModal';
 import ErrorBoundary from './components/ErrorBoundary';
 import { usePWAInstall } from './hooks/usePWAInstall';
 import PWAInstallButton from './components/PWAInstallBanner';
 import {
-  useAuthSyncMachine,
+  useUserDataMachine,
   useAppNavigationMachine,
   useDebouncedSync,
   evaluateHealthMetrics,
   calculateNextSessionStreak,
   toggleHabitCompletion,
-  DEFAULT_GUEST_PROFILE,
+  DEFAULT_USER_PROFILE,
 } from './machines';
+import { SessionRecord } from './types';
 
 interface CustomCycleCardProps {
   initialConfig: { inhale: number; hold: number; exhale: number; holdPost: number };
-  onSave: (config: { inhale: number; hold: number; exhale: number; holdPost: number }) => Promise<void>;
+  onSave: (config: { inhale: number; hold: number; exhale: number; holdPost: number }) => void;
 }
 
 function CustomCycleCard({ initialConfig, onSave }: CustomCycleCardProps) {
   const { value, status, updateValue } = useDebouncedSync(initialConfig, {
     delayMs: 800,
-    onSave,
+    onSave: async (val) => onSave(val),
     onSuccess: () => toast.success('Breathing cycle updated 🌿'),
-    onError: (err) => handleFirestoreError(err, OperationType.UPDATE, 'users'),
   });
 
   const handleFieldChange = (field: 'inhale' | 'hold' | 'exhale' | 'holdPost', val: number) => {
@@ -75,8 +67,6 @@ function CustomCycleCard({ initialConfig, onSave }: CustomCycleCardProps) {
               <span className="flex items-center gap-1.5 text-amber-600">
                 <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse" /> Saving...
               </span>
-            ) : status === 'error' ? (
-              <span className="text-rose-500 font-bold">Sync Error</span>
             ) : (
               <span className="text-soft-sage font-medium flex items-center gap-1">
                 <CheckCircle2 className="w-3.5 h-3.5" /> Saved
@@ -132,25 +122,17 @@ function CustomCycleCard({ initialConfig, onSave }: CustomCycleCardProps) {
 
 export default function App() {
   const { theme, setTheme } = useTheme();
-  const [showAuthModal, setShowAuthModal] = useState(false);
   const pwaState = usePWAInstall();
 
-  // 1. Auth & Data Sync State Machine (supports Guest & Cloud Sync)
+  // 1. User Profile & Mindfulness Data State Machine
   const {
-    state: authSyncState,
-    isGuest,
-    isInitializing,
-    updateLocalProfile,
-    recordGuestSession,
+    profile,
+    sessions,
+    showOnboarding,
+    updateProfile,
+    recordSession,
     dismissOnboarding,
-    handleSignOut,
-  } = useAuthSyncMachine({
-    authInstance: auth,
-    dbInstance: db,
-    onError: (err) => handleFirestoreError(err, OperationType.GET, 'users'),
-  });
-
-  const { user, profile, sessions, showOnboarding } = authSyncState;
+  } = useUserDataMachine();
 
   // Controlled reminder time state to prevent key remounts & focus loss
   const [reminderTimeState, setReminderTimeState] = useState(profile?.reminderTime || '08:00');
@@ -174,238 +156,88 @@ export default function App() {
     setDuration,
   } = useAppNavigationMachine();
 
-  const handleUpdateName = useCallback(async (newName: string) => {
+  const handleUpdateName = useCallback((newName: string) => {
     if (!newName.trim()) return;
-    updateLocalProfile((prev) => (prev ? { ...prev, displayName: newName } : prev));
+    updateProfile((prev) => ({ ...prev, displayName: newName }));
+    toast.success('Name updated! 🌿');
+  }, [updateProfile]);
 
-    if (user && db) {
-      try {
-        await updateProfile(user, { displayName: newName });
-        await setDoc(
-          doc(db, 'users', user.uid),
-          {
-            uid: user.uid,
-            totalSessions: profile?.totalSessions ?? 0,
-            currentStreak: profile?.currentStreak ?? 0,
-            displayName: newName,
-          },
-          { merge: true }
-        );
-        toast.success('Name updated!');
-      } catch {
-        toast.error('Failed to update name in cloud');
-      }
-    } else {
-      toast.success('Name saved locally 🌿');
-    }
-  }, [user, profile, updateLocalProfile]);
+  const handleUpdateHealthDetails = useCallback((field: string, value: string) => {
+    updateProfile((prev) => ({
+      ...prev,
+      healthDetails: { ...(prev.healthDetails || {}), [field]: value },
+    }));
+  }, [updateProfile]);
 
-  const handleUpdateHealthDetails = useCallback(async (field: string, value: string) => {
-    const updatedHealth = { ...(profile?.healthDetails || {}), [field]: value };
-    updateLocalProfile((prev) => (prev ? { ...prev, healthDetails: updatedHealth } : prev));
-
-    if (user && db) {
-      try {
-        await setDoc(
-          doc(db, 'users', user.uid),
-          {
-            uid: user.uid,
-            totalSessions: profile?.totalSessions ?? 0,
-            currentStreak: profile?.currentStreak ?? 0,
-            healthDetails: updatedHealth,
-          },
-          { merge: true }
-        );
-        toast.success('Health details updated in cloud');
-      } catch (e) {
-        handleFirestoreError(e, OperationType.UPDATE, 'users');
-      }
-    }
-  }, [user, profile, updateLocalProfile]);
-
-  const handleSaveCustomBreathing = useCallback(async (config: {
+  const handleSaveCustomBreathing = useCallback((config: {
     inhale: number;
     hold: number;
     exhale: number;
     holdPost: number;
   }) => {
-    updateLocalProfile((prev) => (prev ? { ...prev, customBreathingConfig: config } : prev));
-    if (user && db) {
-      try {
-        await setDoc(
-          doc(db, 'users', user.uid),
-          {
-            uid: user.uid,
-            totalSessions: profile?.totalSessions ?? 0,
-            currentStreak: profile?.currentStreak ?? 0,
-            customBreathingConfig: config,
-          },
-          { merge: true }
-        );
-      } catch (e) {
-        handleFirestoreError(e, OperationType.UPDATE, 'users');
-      }
-    }
-  }, [user, profile, updateLocalProfile]);
+    updateProfile((prev) => ({ ...prev, customBreathingConfig: config }));
+  }, [updateProfile]);
 
-  const handleAddHabit = useCallback(async (name: string) => {
+  const handleAddHabit = useCallback((name: string) => {
     const newHabit = {
       id: crypto.randomUUID(),
       name,
       streak: 0,
       createdAt: new Date().toISOString(),
     };
-    const nextHabits = [...(profile?.habits || []), newHabit];
-    updateLocalProfile((prev) => (prev ? { ...prev, habits: nextHabits } : prev));
+    updateProfile((prev) => ({
+      ...prev,
+      habits: [...(prev.habits || []), newHabit],
+    }));
+    toast.success('Habit added! 🌿');
+  }, [updateProfile]);
 
-    if (user && db) {
-      try {
-        await setDoc(
-          doc(db, 'users', user.uid),
-          {
-            uid: user.uid,
-            totalSessions: profile?.totalSessions ?? 0,
-            currentStreak: profile?.currentStreak ?? 0,
-            habits: nextHabits,
-          },
-          { merge: true }
-        );
-        toast.success('Habit added & synced!');
-      } catch (e) {
-        handleFirestoreError(e, OperationType.UPDATE, 'users');
-      }
-    } else {
-      toast.success('Habit added locally!');
-    }
-  }, [user, profile, updateLocalProfile]);
-
-  const handleToggleHabit = useCallback(async (habitId: string) => {
+  const handleToggleHabit = useCallback((habitId: string) => {
     const now = new Date();
-    const updatedHabits = (profile?.habits || []).map((h) => {
-      if (h.id !== habitId) return h;
-      return toggleHabitCompletion(h, now);
-    });
-    updateLocalProfile((prev) => (prev ? { ...prev, habits: updatedHabits } : prev));
+    updateProfile((prev) => ({
+      ...prev,
+      habits: (prev.habits || []).map((h) => (h.id === habitId ? toggleHabitCompletion(h, now) : h)),
+    }));
+    toast.success('Habit updated! 🌿');
+  }, [updateProfile]);
 
-    if (user && db) {
-      try {
-        await setDoc(
-          doc(db, 'users', user.uid),
-          {
-            uid: user.uid,
-            totalSessions: profile?.totalSessions ?? 0,
-            currentStreak: profile?.currentStreak ?? 0,
-            habits: updatedHabits,
-          },
-          { merge: true }
-        );
-        toast.success('Habit updated!');
-      } catch (e) {
-        handleFirestoreError(e, OperationType.UPDATE, 'users');
-      }
-    } else {
-      toast.success('Habit completed! 🌿');
-    }
-  }, [user, profile, updateLocalProfile]);
+  const handleDeleteHabit = useCallback((habitId: string) => {
+    updateProfile((prev) => ({
+      ...prev,
+      habits: (prev.habits || []).filter((h) => h.id !== habitId),
+    }));
+    toast.success('Habit removed');
+  }, [updateProfile]);
 
-  const handleDeleteHabit = useCallback(async (habitId: string) => {
-    const updatedHabits = (profile?.habits || []).filter((h) => h.id !== habitId);
-    updateLocalProfile((prev) => (prev ? { ...prev, habits: updatedHabits } : prev));
-
-    if (user && db) {
-      try {
-        await setDoc(
-          doc(db, 'users', user.uid),
-          {
-            uid: user.uid,
-            totalSessions: profile?.totalSessions ?? 0,
-            currentStreak: profile?.currentStreak ?? 0,
-            habits: updatedHabits,
-          },
-          { merge: true }
-        );
-        toast.success('Habit removed');
-      } catch (e) {
-        handleFirestoreError(e, OperationType.UPDATE, 'users');
-      }
-    } else {
-      toast.success('Habit removed');
-    }
-  }, [user, profile, updateLocalProfile]);
-
-  const handleSaveReminder = useCallback(async (explicitTime?: string) => {
+  const handleSaveReminder = useCallback((explicitTime?: string) => {
     const val = (explicitTime !== undefined ? explicitTime : reminderTimeState) || '08:00';
-    updateLocalProfile((prev) => (prev ? { ...prev, reminderTime: val } : prev));
+    updateProfile((prev) => ({ ...prev, reminderTime: val }));
+    toast.success(`Daily reminder set for ${val} 🌿`);
+  }, [reminderTimeState, updateProfile]);
 
-    if (user && db) {
-      try {
-        await setDoc(
-          doc(db, 'users', user.uid),
-          {
-            uid: user.uid,
-            totalSessions: profile?.totalSessions ?? 0,
-            currentStreak: profile?.currentStreak ?? 0,
-            reminderTime: val,
-          },
-          { merge: true }
-        );
-        toast.success(`Daily reminder set for ${val} 🌿`);
-      } catch (err) {
-        handleFirestoreError(err, OperationType.UPDATE, 'users');
-        toast.error('Could not sync to cloud, reminder saved locally.');
-      }
-    } else {
-      toast.success(`Reminder saved locally for ${val} 🌿`);
-    }
-  }, [user, profile, reminderTimeState, updateLocalProfile]);
-
-  const handleOnboardingComplete = useCallback(async (data: {
+  const handleOnboardingComplete = useCallback((data: {
     reminderTime: string;
     customBreathing: { inhale: number; hold: number; exhale: number; holdPost: number };
   }) => {
     dismissOnboarding();
     setReminderTimeState(data.reminderTime);
-    updateLocalProfile((prev) =>
-      prev
-        ? {
-            ...prev,
-            reminderTime: data.reminderTime,
-            customBreathingConfig: data.customBreathing,
-            onboardingCompleted: true,
-          }
-        : prev
-    );
+    updateProfile((prev) => ({
+      ...prev,
+      reminderTime: data.reminderTime,
+      customBreathingConfig: data.customBreathing,
+      onboardingCompleted: true,
+    }));
+    toast.success('Welcome to Serenity 🌿');
+  }, [dismissOnboarding, updateProfile]);
 
-    if (user && db) {
-      try {
-        await setDoc(
-          doc(db, 'users', user.uid),
-          {
-            uid: user.uid,
-            totalSessions: profile?.totalSessions ?? 0,
-            currentStreak: profile?.currentStreak ?? 0,
-            reminderTime: data.reminderTime,
-            customBreathingConfig: data.customBreathing,
-            onboardingCompleted: true,
-          },
-          { merge: true }
-        );
-        toast.success('Preferences saved to cloud! Welcome to Serenity 🌿');
-      } catch (e) {
-        handleFirestoreError(e, OperationType.UPDATE, 'users');
-      }
-    } else {
-      toast.success('Preferences saved locally! Welcome to Serenity 🌿');
-    }
-  }, [user, profile, dismissOnboarding, updateLocalProfile]);
-
-  const endSession = useCallback(async (duration: number, moodAfter?: string) => {
+  const endSession = useCallback((duration: number, moodAfter?: string) => {
     if (!activeSession) return;
     dismissSession();
 
     const now = new Date();
-    const sessionData = {
-      uid: user?.uid || 'guest',
+    const sessionData: SessionRecord = {
+      id: crypto.randomUUID(),
+      uid: 'serenity-user',
       mode: activeSession,
       duration,
       timestamp: now.toISOString(),
@@ -420,56 +252,18 @@ export default function App() {
     );
 
     const updatedProfile = {
-      ...(profile || DEFAULT_GUEST_PROFILE),
+      ...(profile || DEFAULT_USER_PROFILE),
       totalSessions: (profile?.totalSessions || 0) + 1,
       currentStreak: streakUpdate.newStreak,
       lastSessionDate: now.toISOString(),
     };
 
-    updateLocalProfile(() => updatedProfile);
-
-    if (user && db) {
-      try {
-        await addDoc(collection(db, 'sessions'), sessionData);
-        await setDoc(
-          doc(db, 'users', user.uid),
-          {
-            uid: user.uid,
-            totalSessions: updatedProfile.totalSessions,
-            currentStreak: updatedProfile.currentStreak,
-            lastSessionDate: updatedProfile.lastSessionDate,
-          },
-          { merge: true }
-        );
-        toast.success('Session completed & backed up to cloud! 🌿');
-      } catch (error) {
-        handleFirestoreError(error, OperationType.WRITE, 'sessions');
-        toast.error('Could not sync to cloud, saved locally on device.');
-      }
-    } else {
-      recordGuestSession({
-        id: crypto.randomUUID(),
-        ...sessionData,
-      });
-      toast.success('Session completed! Well done. 🌿');
-    }
-  }, [user, activeSession, profile, selectedMood, dismissSession, updateLocalProfile, recordGuestSession]);
+    updateProfile(() => updatedProfile);
+    recordSession(sessionData);
+    toast.success('Session completed! Well done. 🌿');
+  }, [activeSession, profile, selectedMood, dismissSession, updateProfile, recordSession]);
 
   const healthMetric = evaluateHealthMetrics(profile?.healthDetails);
-
-  // Initial Boot Splash (only on first render before profile is ready)
-  if (isInitializing && !profile) {
-    return (
-      <div className="flex flex-col items-center justify-center h-screen bg-bg-page gap-4">
-        <div className="w-12 h-12 bg-accent-green rounded-2xl flex items-center justify-center shadow-lg shadow-accent-green/10">
-          <div className="w-4 h-4 bg-white rounded-full animate-pulse" />
-        </div>
-        <p className="text-xs font-bold text-accent-green uppercase tracking-widest opacity-60">
-          Serenity Breathing
-        </p>
-      </div>
-    );
-  }
 
   return (
     <div className="min-h-screen bg-bg-page font-sans text-deep-forest relative overflow-x-hidden">
@@ -513,25 +307,6 @@ export default function App() {
 
           <div className="mt-auto flex flex-col gap-2">
             <PWAInstallButton pwaState={pwaState} variant="sidebar" />
-            {user ? (
-              <Button
-                variant="ghost"
-                onClick={handleSignOut}
-                className="w-full justify-start text-deep-forest/60 hover:text-rose-500 hover:bg-rose-500/10 dark:text-deep-forest/60 dark:hover:text-rose-400 rounded-2xl p-4 h-auto"
-              >
-                <LogOut className="w-5 h-5 mr-4" />
-                <span className="font-bold uppercase tracking-[1px] text-xs">Sign Out</span>
-              </Button>
-            ) : (
-              <Button
-                variant="outline"
-                onClick={() => setShowAuthModal(true)}
-                className="w-full justify-start border-cream text-accent-green hover:bg-card rounded-2xl p-4 h-auto shadow-sm"
-              >
-                <LogIn className="w-5 h-5 mr-3 text-accent-green" />
-                <span className="font-bold uppercase tracking-[1px] text-xs">Sign In (Sync)</span>
-              </Button>
-            )}
           </div>
         </aside>
 
@@ -547,16 +322,9 @@ export default function App() {
             </div>
             <div className="flex items-center gap-2">
               <PWAInstallButton pwaState={pwaState} variant="header" />
-              {!user && (
-                <button
-                  onClick={() => setShowAuthModal(true)}
-                  className="text-[11px] font-bold text-accent-green/80 hover:text-accent-green px-2 py-1"
-                >
-                  Sign In
-                </button>
-              )}
             </div>
           </header>
+
           <AnimatePresence mode="wait">
             {activeTab === 'home' && (
               <div className="max-w-2xl mx-auto">
@@ -592,45 +360,11 @@ export default function App() {
                       Account & Preferences
                     </p>
                   </div>
-                  <div className="flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest border border-cream/70 bg-card">
-                    {user ? (
-                      <>
-                        <Cloud className="w-3.5 h-3.5 text-soft-sage" />
-                        <span className="text-soft-sage">Cloud Synced</span>
-                      </>
-                    ) : (
-                      <>
-                        <ShieldCheck className="w-3.5 h-3.5 text-accent-green" />
-                        <span className="text-accent-green/90">Guest (Local)</span>
-                      </>
-                    )}
+                  <div className="flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest border border-cream/70 bg-card text-accent-green/80">
+                    <Sparkles className="w-3.5 h-3.5 text-soft-sage" />
+                    <span>Personal Space</span>
                   </div>
                 </div>
-
-                {/* Cloud Sync Status / Sign-in Banner for Guests */}
-                {!user && (
-                  <Card className="border border-soft-sage/40 bg-soft-sage/5 shadow-none rounded-[32px] overflow-hidden">
-                    <CardContent className="p-6 sm:p-8 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-                      <div className="flex items-start gap-4">
-                        <div className="w-12 h-12 rounded-2xl bg-soft-sage/20 text-accent-green flex items-center justify-center flex-shrink-0">
-                          <Cloud className="w-6 h-6 text-accent-green" />
-                        </div>
-                        <div>
-                          <h3 className="font-bold text-deep-forest text-base">Cloud Backup & Device Sync</h3>
-                          <p className="text-xs text-accent-green/80 max-w-sm mt-0.5 leading-relaxed">
-                            Your streaks and sessions are safe on this browser. Create a free account or sign in anytime to sync across mobile and desktop.
-                          </p>
-                        </div>
-                      </div>
-                      <Button
-                        onClick={() => setShowAuthModal(true)}
-                        className="rounded-full bg-accent-green hover:bg-deep-forest text-white dark:text-zinc-950 px-6 font-bold text-xs uppercase tracking-wider h-11 w-full sm:w-auto flex-shrink-0"
-                      >
-                        Sign In / Register
-                      </Button>
-                    </CardContent>
-                  </Card>
-                )}
 
                 {/* PWA Install Promotion Card (Only visible until installed) */}
                 <PWAInstallButton pwaState={pwaState} variant="card" />
@@ -647,15 +381,15 @@ export default function App() {
                       </div>
                       <div className="flex-1 text-center sm:text-left">
                         <input
-                          key={`name-${user?.displayName || profile?.displayName || 'guest'}`}
+                          key={`name-${profile?.displayName || 'user'}`}
                           type="text"
-                          defaultValue={user?.displayName || profile?.displayName || 'Mindful Friend'}
+                          defaultValue={profile?.displayName || 'Mindful Friend'}
                           onBlur={(e) => handleUpdateName(e.target.value)}
                           className="text-2xl font-bold text-deep-forest bg-transparent border-none focus:ring-0 p-0 w-full sm:w-auto outline-none"
                           placeholder="Your Name"
                         />
-                        <p className="text-sm text-accent-green/80">
-                          {user?.email || 'Practicing as Guest (Offline Sanctuary)'}
+                        <p className="text-xs text-accent-green/80 mt-1">
+                          {profile?.totalSessions || 0} sessions completed • {profile?.currentStreak || 0} day streak
                         </p>
                       </div>
                     </div>
@@ -700,18 +434,6 @@ export default function App() {
                         ))}
                       </div>
                     </div>
-
-                    {user && (
-                      <div className="pt-6 border-t border-cream/50">
-                        <Button
-                          variant="outline"
-                          onClick={handleSignOut}
-                          className="w-full border-cream text-accent-green hover:bg-rose-500/10 hover:text-rose-600 dark:hover:text-rose-400 hover:border-rose-200 dark:hover:border-rose-900 rounded-2xl h-12"
-                        >
-                          <LogOut className="w-4 h-4 mr-2" /> Sign Out
-                        </Button>
-                      </div>
-                    )}
                   </CardContent>
                 </Card>
 
@@ -905,25 +627,6 @@ export default function App() {
       <AnimatePresence>
         {showOnboarding && (
           <OnboardingModal onComplete={handleOnboardingComplete} />
-        )}
-      </AnimatePresence>
-
-      {/* Cloud Account Sign-in Modal */}
-      <AnimatePresence>
-        {showAuthModal && (
-          <div className="fixed inset-0 z-[100] bg-deep-forest/40 backdrop-blur-md flex items-center justify-center p-4 overflow-y-auto">
-            <motion.div
-              initial={{ opacity: 0, scale: 0.95, y: 20 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.95, y: 20 }}
-              className="w-full max-w-md my-auto"
-            >
-              <AuthScreen
-                onClose={() => setShowAuthModal(false)}
-                onSuccess={() => setShowAuthModal(false)}
-              />
-            </motion.div>
-          </div>
         )}
       </AnimatePresence>
     </div>

@@ -5,12 +5,11 @@ import {
   getActivePhases,
   BreathingSessionState,
 } from './breathingSessionMachine';
-import { authFormReducer, initialAuthFormState } from './authFormMachine';
+import { userDataReducer, DEFAULT_USER_PROFILE, UserDataState } from './userDataMachine';
 import { onboardingReducer, initialOnboardingState } from './onboardingMachine';
 import { evaluateHabit, toggleHabitCompletion } from './habitMachine';
 import { evaluateSessionStreak, calculateNextSessionStreak } from './sessionStreakMachine';
 import { evaluateHealthMetrics } from './healthMetricMachine';
-import { authSyncReducer, initialAuthSyncState } from './authSyncMachine';
 import { appNavigationReducer, initialAppNavigationState } from './appNavigationMachine';
 import { quoteReducer, initialQuoteState } from './quoteMachine';
 import { debouncedSyncReducer, DebouncedSyncState } from './debouncedSyncMachine';
@@ -109,36 +108,49 @@ test('Breathing Session Machine: Warmup and Phase Cycling', () => {
   assert.ok(emptyPhasesState.currentPhase, 'Current phase must stay valid even with empty phases');
 });
 
-test('Auth Form Machine: Mode Transitions and Error Clearing', () => {
-  let state = initialAuthFormState;
-  assert.equal(state.mode, 'signIn');
-  assert.equal(state.status, 'idle');
+test('User Data Machine: Profile Updates, Session Records, and Reset Transitions', () => {
+  let state: UserDataState = {
+    profile: DEFAULT_USER_PROFILE,
+    sessions: [],
+    showOnboarding: false,
+  };
+  assert.equal(state.profile.displayName, 'Mindful Friend');
+  assert.equal(state.sessions.length, 0);
 
-  // Switch to sign up
-  state = authFormReducer(state, { type: 'SWITCH_MODE', mode: 'signUp' });
-  assert.equal(state.mode, 'signUp');
+  // Update profile name
+  state = userDataReducer(state, {
+    type: 'UPDATE_PROFILE',
+    updater: (prev) => ({ ...prev, displayName: 'Peaceful Seeker' }),
+  });
+  assert.equal(state.profile.displayName, 'Peaceful Seeker');
 
-  // Set field
-  state = authFormReducer(state, { type: 'SET_FIELD', field: 'email', value: 'mindful@test.com' });
-  assert.equal(state.email, 'mindful@test.com');
+  // Record session
+  state = userDataReducer(state, {
+    type: 'RECORD_SESSION',
+    session: {
+      id: 'session-1',
+      uid: 'serenity-user',
+      mode: 'calm',
+      duration: 300,
+      timestamp: new Date().toISOString(),
+      moodBefore: 'stressed',
+      moodAfter: 'calm',
+    },
+  });
+  assert.equal(state.sessions.length, 1);
+  assert.equal(state.sessions[0].mode, 'calm');
+  assert.equal(state.sessions[0].moodAfter, 'calm');
 
-  // Start submit
-  state = authFormReducer(state, { type: 'SUBMIT_START' });
-  assert.equal(state.status, 'submitting');
+  // Show / dismiss onboarding
+  state = userDataReducer(state, { type: 'SET_SHOW_ONBOARDING', show: true });
+  assert.equal(state.showOnboarding, true);
+  state = userDataReducer(state, { type: 'SET_SHOW_ONBOARDING', show: false });
+  assert.equal(state.showOnboarding, false);
 
-  // Fail submit
-  state = authFormReducer(state, { type: 'SUBMIT_ERROR', error: 'Network error' });
-  assert.equal(state.status, 'error');
-  assert.equal(state.errorMessage, 'Network error');
-
-  // Typing in a field clears error
-  state = authFormReducer(state, { type: 'SET_FIELD', field: 'password', value: 'secret' });
-  assert.equal(state.errorMessage, null);
-
-  // Switch to forgot password
-  state = authFormReducer(state, { type: 'SWITCH_MODE', mode: 'forgotPassword' });
-  assert.equal(state.mode, 'forgotPassword');
-  assert.equal(state.status, 'idle');
+  // Reset data
+  state = userDataReducer(state, { type: 'RESET_DATA' });
+  assert.equal(state.profile.displayName, 'Mindful Friend');
+  assert.equal(state.sessions.length, 0);
 });
 
 test('Onboarding Machine: Navigation and Presets', () => {
@@ -353,58 +365,7 @@ test('Health Metric Machine: Mindful BMI Evaluation and Classifications', () => 
   assert.equal(priority.color, 'text-rose-500');
 });
 
-test('Auth Sync Machine: Reducer Lifecycle and Error Recovery', () => {
-  let state = initialAuthSyncState;
-  assert.equal(state.status, 'initializing');
-  assert.equal(state.user, null);
 
-  // 1. Auth resolved with null user -> instantly ready as Guest with local profile
-  state = authSyncReducer(state, { type: 'AUTH_RESOLVED', user: null });
-  assert.equal(state.status, 'ready');
-  assert.equal(state.isGuest, true);
-  assert.ok(state.profile !== null);
-
-  // 2. Auth resolved with user -> transitions to syncing_profile
-  const mockUser: any = { uid: 'user-123', email: 'test@serenity.com', displayName: 'Mindful User' };
-  state = authSyncReducer(state, { type: 'AUTH_RESOLVED', user: mockUser });
-  assert.equal(state.status, 'syncing_profile');
-  assert.equal(state.isGuest, false);
-  assert.equal(state.user?.uid, 'user-123');
-
-  // 3. Profile loaded -> transitions to ready
-  const mockProfile = {
-    uid: 'user-123',
-    displayName: 'Mindful User',
-    totalSessions: 3,
-    currentStreak: 2,
-    onboardingCompleted: true,
-  };
-  state = authSyncReducer(state, { type: 'PROFILE_LOADED', profile: mockProfile });
-  assert.equal(state.status, 'ready');
-  assert.equal(state.isGuest, false);
-  assert.equal(state.showOnboarding, false);
-  assert.equal(state.profile?.totalSessions, 3);
-
-  // 4. Update local profile optimistically
-  state = authSyncReducer(state, {
-    type: 'UPDATE_LOCAL_PROFILE',
-    updater: (prev) => prev ? { ...prev, displayName: 'Updated Serenity' } : prev,
-  });
-  assert.equal(state.profile?.displayName, 'Updated Serenity');
-
-  // 5. Sign out -> cleanly resets to guest ready state
-  state = authSyncReducer(state, { type: 'SIGNOUT' });
-  assert.equal(state.status, 'ready');
-  assert.equal(state.isGuest, true);
-  assert.equal(state.user, null);
-
-  // 6. Sync error with no existing profile transitions to sync_error
-  let errorState = initialAuthSyncState;
-  errorState = authSyncReducer(errorState, { type: 'AUTH_RESOLVED', user: mockUser });
-  errorState = authSyncReducer(errorState, { type: 'SYNC_ERROR', error: 'Permission denied' });
-  assert.equal(errorState.status, 'sync_error');
-  assert.equal(errorState.errorMessage, 'Permission denied');
-});
 
 test('App Navigation Machine: Tabs, Session Overlays, and Duration Clamping', () => {
   let state = initialAppNavigationState;
