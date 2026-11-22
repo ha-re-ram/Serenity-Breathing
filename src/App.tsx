@@ -1,7 +1,7 @@
-import { useCallback, useState } from 'react';
+import { useCallback, useState, useEffect } from 'react';
 import { auth, db, handleFirestoreError, OperationType } from './firebase';
 import { updateProfile } from 'firebase/auth';
-import { doc, updateDoc, collection, addDoc } from 'firebase/firestore';
+import { doc, setDoc, collection, addDoc } from 'firebase/firestore';
 import { Toaster, toast } from 'sonner';
 import { motion, AnimatePresence } from 'motion/react';
 import { useTheme } from 'next-themes';
@@ -29,6 +29,8 @@ import ProgressScreen from './components/ProgressScreen';
 import AuthScreen from './components/AuthScreen';
 import OnboardingModal from './components/OnboardingModal';
 import ErrorBoundary from './components/ErrorBoundary';
+import { usePWAInstall } from './hooks/usePWAInstall';
+import PWAInstallButton from './components/PWAInstallBanner';
 import {
   useAuthSyncMachine,
   useAppNavigationMachine,
@@ -131,6 +133,7 @@ function CustomCycleCard({ initialConfig, onSave }: CustomCycleCardProps) {
 export default function App() {
   const { theme, setTheme } = useTheme();
   const [showAuthModal, setShowAuthModal] = useState(false);
+  const pwaState = usePWAInstall();
 
   // 1. Auth & Data Sync State Machine (supports Guest & Cloud Sync)
   const {
@@ -148,6 +151,15 @@ export default function App() {
   });
 
   const { user, profile, sessions, showOnboarding } = authSyncState;
+
+  // Controlled reminder time state to prevent key remounts & focus loss
+  const [reminderTimeState, setReminderTimeState] = useState(profile?.reminderTime || '08:00');
+
+  useEffect(() => {
+    if (profile?.reminderTime) {
+      setReminderTimeState(profile.reminderTime);
+    }
+  }, [profile?.reminderTime]);
 
   // 2. Navigation & Modal Hierarchy State Machine
   const {
@@ -169,7 +181,16 @@ export default function App() {
     if (user && db) {
       try {
         await updateProfile(user, { displayName: newName });
-        await updateDoc(doc(db, 'users', user.uid), { displayName: newName });
+        await setDoc(
+          doc(db, 'users', user.uid),
+          {
+            uid: user.uid,
+            totalSessions: profile?.totalSessions ?? 0,
+            currentStreak: profile?.currentStreak ?? 0,
+            displayName: newName,
+          },
+          { merge: true }
+        );
         toast.success('Name updated!');
       } catch {
         toast.error('Failed to update name in cloud');
@@ -177,7 +198,7 @@ export default function App() {
     } else {
       toast.success('Name saved locally 🌿');
     }
-  }, [user, updateLocalProfile]);
+  }, [user, profile, updateLocalProfile]);
 
   const handleUpdateHealthDetails = useCallback(async (field: string, value: string) => {
     const updatedHealth = { ...(profile?.healthDetails || {}), [field]: value };
@@ -185,7 +206,16 @@ export default function App() {
 
     if (user && db) {
       try {
-        await updateDoc(doc(db, 'users', user.uid), { healthDetails: updatedHealth });
+        await setDoc(
+          doc(db, 'users', user.uid),
+          {
+            uid: user.uid,
+            totalSessions: profile?.totalSessions ?? 0,
+            currentStreak: profile?.currentStreak ?? 0,
+            healthDetails: updatedHealth,
+          },
+          { merge: true }
+        );
         toast.success('Health details updated in cloud');
       } catch (e) {
         handleFirestoreError(e, OperationType.UPDATE, 'users');
@@ -201,9 +231,22 @@ export default function App() {
   }) => {
     updateLocalProfile((prev) => (prev ? { ...prev, customBreathingConfig: config } : prev));
     if (user && db) {
-      await updateDoc(doc(db, 'users', user.uid), { customBreathingConfig: config });
+      try {
+        await setDoc(
+          doc(db, 'users', user.uid),
+          {
+            uid: user.uid,
+            totalSessions: profile?.totalSessions ?? 0,
+            currentStreak: profile?.currentStreak ?? 0,
+            customBreathingConfig: config,
+          },
+          { merge: true }
+        );
+      } catch (e) {
+        handleFirestoreError(e, OperationType.UPDATE, 'users');
+      }
     }
-  }, [user, updateLocalProfile]);
+  }, [user, profile, updateLocalProfile]);
 
   const handleAddHabit = useCallback(async (name: string) => {
     const newHabit = {
@@ -217,7 +260,16 @@ export default function App() {
 
     if (user && db) {
       try {
-        await updateDoc(doc(db, 'users', user.uid), { habits: nextHabits });
+        await setDoc(
+          doc(db, 'users', user.uid),
+          {
+            uid: user.uid,
+            totalSessions: profile?.totalSessions ?? 0,
+            currentStreak: profile?.currentStreak ?? 0,
+            habits: nextHabits,
+          },
+          { merge: true }
+        );
         toast.success('Habit added & synced!');
       } catch (e) {
         handleFirestoreError(e, OperationType.UPDATE, 'users');
@@ -237,7 +289,16 @@ export default function App() {
 
     if (user && db) {
       try {
-        await updateDoc(doc(db, 'users', user.uid), { habits: updatedHabits });
+        await setDoc(
+          doc(db, 'users', user.uid),
+          {
+            uid: user.uid,
+            totalSessions: profile?.totalSessions ?? 0,
+            currentStreak: profile?.currentStreak ?? 0,
+            habits: updatedHabits,
+          },
+          { merge: true }
+        );
         toast.success('Habit updated!');
       } catch (e) {
         handleFirestoreError(e, OperationType.UPDATE, 'users');
@@ -253,7 +314,16 @@ export default function App() {
 
     if (user && db) {
       try {
-        await updateDoc(doc(db, 'users', user.uid), { habits: updatedHabits });
+        await setDoc(
+          doc(db, 'users', user.uid),
+          {
+            uid: user.uid,
+            totalSessions: profile?.totalSessions ?? 0,
+            currentStreak: profile?.currentStreak ?? 0,
+            habits: updatedHabits,
+          },
+          { merge: true }
+        );
         toast.success('Habit removed');
       } catch (e) {
         handleFirestoreError(e, OperationType.UPDATE, 'users');
@@ -263,11 +333,38 @@ export default function App() {
     }
   }, [user, profile, updateLocalProfile]);
 
+  const handleSaveReminder = useCallback(async (explicitTime?: string) => {
+    const val = (explicitTime !== undefined ? explicitTime : reminderTimeState) || '08:00';
+    updateLocalProfile((prev) => (prev ? { ...prev, reminderTime: val } : prev));
+
+    if (user && db) {
+      try {
+        await setDoc(
+          doc(db, 'users', user.uid),
+          {
+            uid: user.uid,
+            totalSessions: profile?.totalSessions ?? 0,
+            currentStreak: profile?.currentStreak ?? 0,
+            reminderTime: val,
+          },
+          { merge: true }
+        );
+        toast.success(`Daily reminder set for ${val} 🌿`);
+      } catch (err) {
+        handleFirestoreError(err, OperationType.UPDATE, 'users');
+        toast.error('Could not sync to cloud, reminder saved locally.');
+      }
+    } else {
+      toast.success(`Reminder saved locally for ${val} 🌿`);
+    }
+  }, [user, profile, reminderTimeState, updateLocalProfile]);
+
   const handleOnboardingComplete = useCallback(async (data: {
     reminderTime: string;
     customBreathing: { inhale: number; hold: number; exhale: number; holdPost: number };
   }) => {
     dismissOnboarding();
+    setReminderTimeState(data.reminderTime);
     updateLocalProfile((prev) =>
       prev
         ? {
@@ -281,11 +378,18 @@ export default function App() {
 
     if (user && db) {
       try {
-        await updateDoc(doc(db, 'users', user.uid), {
-          reminderTime: data.reminderTime,
-          customBreathingConfig: data.customBreathing,
-          onboardingCompleted: true,
-        });
+        await setDoc(
+          doc(db, 'users', user.uid),
+          {
+            uid: user.uid,
+            totalSessions: profile?.totalSessions ?? 0,
+            currentStreak: profile?.currentStreak ?? 0,
+            reminderTime: data.reminderTime,
+            customBreathingConfig: data.customBreathing,
+            onboardingCompleted: true,
+          },
+          { merge: true }
+        );
         toast.success('Preferences saved to cloud! Welcome to Serenity 🌿');
       } catch (e) {
         handleFirestoreError(e, OperationType.UPDATE, 'users');
@@ -293,7 +397,7 @@ export default function App() {
     } else {
       toast.success('Preferences saved locally! Welcome to Serenity 🌿');
     }
-  }, [user, dismissOnboarding, updateLocalProfile]);
+  }, [user, profile, dismissOnboarding, updateLocalProfile]);
 
   const endSession = useCallback(async (duration: number, moodAfter?: string) => {
     if (!activeSession) return;
@@ -327,11 +431,16 @@ export default function App() {
     if (user && db) {
       try {
         await addDoc(collection(db, 'sessions'), sessionData);
-        await updateDoc(doc(db, 'users', user.uid), {
-          totalSessions: updatedProfile.totalSessions,
-          currentStreak: updatedProfile.currentStreak,
-          lastSessionDate: updatedProfile.lastSessionDate,
-        });
+        await setDoc(
+          doc(db, 'users', user.uid),
+          {
+            uid: user.uid,
+            totalSessions: updatedProfile.totalSessions,
+            currentStreak: updatedProfile.currentStreak,
+            lastSessionDate: updatedProfile.lastSessionDate,
+          },
+          { merge: true }
+        );
         toast.success('Session completed & backed up to cloud! 🌿');
       } catch (error) {
         handleFirestoreError(error, OperationType.WRITE, 'sessions');
@@ -402,7 +511,8 @@ export default function App() {
             ))}
           </nav>
 
-          <div className="mt-auto">
+          <div className="mt-auto flex flex-col gap-2">
+            <PWAInstallButton pwaState={pwaState} variant="sidebar" />
             {user ? (
               <Button
                 variant="ghost"
@@ -427,6 +537,26 @@ export default function App() {
 
         {/* Main Content Area */}
         <main className="flex-1 p-4 sm:p-6 lg:p-12 pb-[max(7rem,calc(6rem+env(safe-area-inset-bottom)))] lg:pb-12 overflow-y-auto">
+          {/* Mobile Header with Logo & PWA Install Button */}
+          <header className="lg:hidden flex justify-between items-center mb-6 pt-1">
+            <div className="flex items-center gap-2.5">
+              <div className="w-8 h-8 bg-accent-green rounded-xl flex items-center justify-center shadow-md shadow-accent-green/20">
+                <div className="w-2.5 h-2.5 bg-white rounded-full animate-pulse" />
+              </div>
+              <span className="font-serif text-lg text-deep-forest">Serenity</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <PWAInstallButton pwaState={pwaState} variant="header" />
+              {!user && (
+                <button
+                  onClick={() => setShowAuthModal(true)}
+                  className="text-[11px] font-bold text-accent-green/80 hover:text-accent-green px-2 py-1"
+                >
+                  Sign In
+                </button>
+              )}
+            </div>
+          </header>
           <AnimatePresence mode="wait">
             {activeTab === 'home' && (
               <div className="max-w-2xl mx-auto">
@@ -501,6 +631,9 @@ export default function App() {
                     </CardContent>
                   </Card>
                 )}
+
+                {/* PWA Install Promotion Card (Only visible until installed) */}
+                <PWAInstallButton pwaState={pwaState} variant="card" />
 
                 {/* Profile Card */}
                 <Card className="border border-cream shadow-none bg-card rounded-[32px] overflow-hidden">
@@ -619,23 +752,10 @@ export default function App() {
                           <span className="font-medium text-deep-forest">Daily Reminder</span>
                         </div>
                         <Input
-                          key={`reminder-${profile?.reminderTime || '08:00'}`}
                           type="time"
-                          defaultValue={profile?.reminderTime || '08:00'}
-                          onBlur={async (e) => {
-                            const val = e.target.value;
-                            updateLocalProfile((prev) => (prev ? { ...prev, reminderTime: val } : prev));
-                            if (user && db) {
-                              try {
-                                await updateDoc(doc(db, 'users', user.uid), { reminderTime: val });
-                                toast.success(`Reminder set for ${val}`);
-                              } catch (err) {
-                                handleFirestoreError(err, OperationType.UPDATE, 'users');
-                              }
-                            } else {
-                              toast.success(`Reminder saved locally for ${val}`);
-                            }
-                          }}
+                          value={reminderTimeState}
+                          onChange={(e) => setReminderTimeState(e.target.value)}
+                          onBlur={() => handleSaveReminder()}
                           className="w-32 h-10 rounded-xl border-cream bg-bg-page/30 font-bold text-accent-green"
                         />
                       </div>

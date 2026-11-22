@@ -324,19 +324,19 @@ export function useAuthSyncMachine({ authInstance, dbInstance, onError }: UseAut
             customBreathingConfig: guest.customBreathingConfig || DEFAULT_GUEST_PROFILE.customBreathingConfig,
             onboardingCompleted: true,
           };
-          setDoc(profileRef, initialProfile)
+          setDoc(profileRef, initialProfile, { merge: true })
             .then(() => {
               dispatch({ type: 'PROFILE_CREATED', profile: initialProfile });
             })
             .catch((err) => {
               dispatch({ type: 'SYNC_ERROR', error: 'Failed to create user profile' });
-              onError?.(err);
+              try { onError?.(err); } catch {}
             });
         }
       },
       (err) => {
         dispatch({ type: 'SYNC_ERROR', error: err.message || 'Profile sync failed' });
-        onError?.(err);
+        try { onError?.(err); } catch {}
       }
     );
 
@@ -348,7 +348,7 @@ export function useAuthSyncMachine({ authInstance, dbInstance, onError }: UseAut
         dispatch({ type: 'SESSIONS_LOADED', sessions: sorted });
       },
       (err) => {
-        onError?.(err);
+        try { onError?.(err); } catch {}
       }
     );
 

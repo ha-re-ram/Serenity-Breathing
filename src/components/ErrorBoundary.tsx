@@ -1,5 +1,5 @@
 import { Component, ErrorInfo, ReactNode } from 'react';
-import { RefreshCw, AlertTriangle, Sparkles, Home } from 'lucide-react';
+import { RefreshCw, AlertTriangle, Sparkles, Copy, Check } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 interface ErrorBoundaryProps {
@@ -13,12 +13,14 @@ interface ErrorBoundaryState {
   error: Error | null;
   errorInfo: ErrorInfo | null;
   showDetails: boolean;
+  copied: boolean;
 }
 
 /**
  * Enterprise-grade React Error Boundary.
  * Prevents "White Screen of Death" by catching unhandled exceptions anywhere
  * in the React tree and rendering a calming, functional recovery screen.
+ * Allows full text selection and one-click copying for error diagnostics.
  */
 export default class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
   constructor(props: ErrorBoundaryProps) {
@@ -28,6 +30,7 @@ export default class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBo
       error: null,
       errorInfo: null,
       showDetails: false,
+      copied: false,
     };
   }
 
@@ -67,10 +70,23 @@ export default class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBo
     window.location.href = '/';
   };
 
+  handleCopyError = () => {
+    const errorText = `${this.state.error?.toString() || ''}\n${this.state.errorInfo?.componentStack || ''}`;
+    try {
+      if (navigator.clipboard) {
+        navigator.clipboard.writeText(errorText);
+        this.setState({ copied: true });
+        setTimeout(() => this.setState({ copied: false }), 2000);
+      }
+    } catch (e) {
+      console.warn('Copy failed:', e);
+    }
+  };
+
   render() {
     if (this.state.hasError) {
       return (
-        <div className="min-h-screen bg-bg-page flex flex-col items-center justify-center p-6 text-center select-none font-sans text-deep-forest">
+        <div className="min-h-screen bg-bg-page flex flex-col items-center justify-center p-6 text-center font-sans text-deep-forest select-text">
           <div className="max-w-md w-full bg-card border border-cream rounded-[32px] p-8 shadow-xl flex flex-col items-center gap-6">
             {/* Visual Icon */}
             <div className="w-16 h-16 rounded-3xl bg-soft-sage/20 text-accent-green flex items-center justify-center shadow-lg shadow-accent-green/10">
@@ -109,17 +125,39 @@ export default class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBo
             {/* Collapsible Error Details for Troubleshooting */}
             {this.state.error && (
               <div className="w-full text-left pt-2 border-t border-cream/60">
-                <button
-                  type="button"
-                  onClick={() => this.setState((prev) => ({ showDetails: !prev.showDetails }))}
-                  className="text-[10px] font-bold uppercase tracking-widest text-accent-green/60 hover:text-accent-green flex items-center gap-1 mx-auto"
-                >
-                  <AlertTriangle className="w-3 h-3" />
-                  {this.state.showDetails ? 'Hide Details' : 'Technical Details'}
-                </button>
+                <div className="flex items-center justify-between">
+                  <button
+                    type="button"
+                    onClick={() => this.setState((prev) => ({ showDetails: !prev.showDetails }))}
+                    className="text-[10px] font-bold uppercase tracking-widest text-accent-green/60 hover:text-accent-green flex items-center gap-1"
+                  >
+                    <AlertTriangle className="w-3 h-3" />
+                    {this.state.showDetails ? 'Hide Details' : 'Technical Details'}
+                  </button>
+
+                  {this.state.showDetails && (
+                    <button
+                      type="button"
+                      onClick={this.handleCopyError}
+                      className="text-[10px] font-bold uppercase tracking-wider text-accent-green hover:text-deep-forest flex items-center gap-1"
+                    >
+                      {this.state.copied ? (
+                        <>
+                          <Check className="w-3 h-3 text-emerald-600" />
+                          <span>Copied!</span>
+                        </>
+                      ) : (
+                        <>
+                          <Copy className="w-3 h-3" />
+                          <span>Copy Details</span>
+                        </>
+                      )}
+                    </button>
+                  )}
+                </div>
 
                 {this.state.showDetails && (
-                  <pre className="mt-3 p-3 bg-muted rounded-xl text-[10px] font-mono text-deep-forest/80 overflow-x-auto max-h-40 text-left whitespace-pre-wrap break-words">
+                  <pre className="mt-3 p-3 bg-muted rounded-xl text-[10px] font-mono text-deep-forest/80 overflow-x-auto max-h-40 text-left whitespace-pre-wrap break-words select-all">
                     {this.state.error.toString()}
                     {this.state.errorInfo?.componentStack}
                   </pre>

@@ -62,24 +62,31 @@ export interface FirestoreErrorInfo {
 }
 
 export function handleFirestoreError(error: unknown, operationType: OperationType, path: string | null) {
-  const errInfo: FirestoreErrorInfo = {
-    error: error instanceof Error ? error.message : String(error),
-    authInfo: {
-      userId: auth.currentUser?.uid,
-      email: auth.currentUser?.email,
-      emailVerified: auth.currentUser?.emailVerified,
-      isAnonymous: auth.currentUser?.isAnonymous,
-      tenantId: auth.currentUser?.tenantId,
-      providerInfo: auth.currentUser?.providerData.map(provider => ({
-        providerId: provider.providerId,
-        displayName: provider.displayName,
-        email: provider.email,
-        photoUrl: provider.photoURL
-      })) || []
-    },
-    operationType,
-    path
-  };
-  // Log the error for debugging but do NOT re-throw — callers handle their own UX.
-  console.error('Firestore Error:', JSON.stringify(errInfo, null, 2));
+  try {
+    const currentUser = auth?.currentUser;
+    const errInfo: FirestoreErrorInfo = {
+      error: error instanceof Error ? error.message : String(error),
+      authInfo: {
+        userId: currentUser?.uid,
+        email: currentUser?.email,
+        emailVerified: currentUser?.emailVerified,
+        isAnonymous: currentUser?.isAnonymous,
+        tenantId: currentUser?.tenantId,
+        providerInfo: Array.isArray(currentUser?.providerData)
+          ? currentUser.providerData.map((provider) => ({
+              providerId: provider.providerId,
+              displayName: provider.displayName,
+              email: provider.email,
+              photoUrl: provider.photoURL,
+            }))
+          : [],
+      },
+      operationType,
+      path,
+    };
+    // Log the error for debugging but do NOT re-throw — callers handle their own UX.
+    console.error('Firestore Error:', JSON.stringify(errInfo, null, 2));
+  } catch {
+    console.error('Firestore Error (raw):', error);
+  }
 }
