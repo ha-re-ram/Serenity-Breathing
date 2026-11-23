@@ -194,6 +194,32 @@
     <link rel="manifest" href="/manifest.json" />
     <link rel="icon" href="/icon.png" />
     <link rel="apple-touch-icon" href="/icon.png" />
+
+    <!-- Self-healing error recovery for stale cached shells or chunk hash mismatches -->
+    <script>
+      window.addEventListener('error', function(e) {
+        var target = e.target;
+        if (target && (target.tagName === 'SCRIPT' || target.tagName === 'LINK')) {
+          var key = 'serenity_asset_reload_' + (target.src || target.href || '');
+          if (!sessionStorage.getItem(key)) {
+            sessionStorage.setItem(key, '1');
+            console.warn('Asset loading failed, recovering with reload...', target.src || target.href);
+            window.location.reload();
+          }
+        }
+      }, true);
+      window.addEventListener('unhandledrejection', function(e) {
+        var reason = e.reason && (e.reason.message || String(e.reason));
+        if (reason && (reason.indexOf('dynamically imported module') !== -1 || reason.indexOf('error loading dynamically imported module') !== -1)) {
+          var key = 'serenity_dyn_reload';
+          if (!sessionStorage.getItem(key)) {
+            sessionStorage.setItem(key, '1');
+            console.warn('Dynamic chunk import failed, syncing bundle...', reason);
+            window.location.reload();
+          }
+        }
+      });
+    </script>
   </head>
   <body>
     <div id="root">
