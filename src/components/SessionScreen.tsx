@@ -11,7 +11,6 @@ import {
   Music,
   Sliders,
   Check,
-  Eye,
 } from 'lucide-react';
 import { BreathingMode } from '../types';
 import BreathingCircle from './BreathingCircle';
@@ -189,19 +188,7 @@ export default function SessionScreen({
           <span className="text-[10px] font-bold text-accent-green/70 uppercase tracking-[2px]">
             Mode
           </span>
-          <div className="flex items-center gap-1.5">
-            <h2 className="text-lg sm:text-xl font-serif text-deep-forest">{config.label}</h2>
-            {isScreenAwake && (
-              <span
-                className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-soft-sage/20 border border-soft-sage/30 text-[9px] font-bold text-accent-green"
-                title="Screen awake lock active: display will not sleep while breathing"
-              >
-                <span className="w-1.5 h-1.5 rounded-full bg-accent-green animate-pulse" />
-                <Eye className="w-2.5 h-2.5 text-accent-green" />
-                <span className="hidden sm:inline">Awake</span>
-              </span>
-            )}
-          </div>
+          <h2 className="text-lg sm:text-xl font-serif text-deep-forest">{config.label}</h2>
         </div>
 
         {/* Audio & Playback Controls */}

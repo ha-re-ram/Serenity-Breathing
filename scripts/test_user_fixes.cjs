@@ -69,23 +69,10 @@ async function testUserFixes() {
   const reminderElements = await page.evaluate(() => {
     const text = document.body.innerText;
     const hasDailyReminder = text.includes('Daily Reminder');
-    const hasTestBtn = Array.from(document.querySelectorAll('button')).some((b) => b.textContent === 'Test');
-    return { hasDailyReminder, hasTestBtn };
+    const hasTimeInput = document.querySelectorAll('input[type="time"]').length > 0;
+    return { hasDailyReminder, hasTimeInput };
   });
-  console.log('  Daily Reminder & Test Button present:', reminderElements);
-
-  // Click Test button
-  const testClicked = await page.evaluate(() => {
-    const btns = Array.from(document.querySelectorAll('button'));
-    const testBtn = btns.find((b) => b.textContent === 'Test');
-    if (testBtn) {
-      testBtn.click();
-      return true;
-    }
-    return false;
-  });
-  console.log('  Test notification clicked:', testClicked);
-  await new Promise((r) => setTimeout(r, 600));
+  console.log('  Daily Reminder & Time Input present:', reminderElements);
 
   console.log('\n--- Test 3: Breathing Session Screen Awake & Goal Completion Prompt ---');
   // Return to home tab
@@ -120,13 +107,12 @@ async function testUserFixes() {
   });
   await new Promise((r) => setTimeout(r, 500));
 
-  // Check Screen Awake indicator
-  const awakeStatus = await page.evaluate(() => {
+  // Check Mode title in active session
+  const sessionActive = await page.evaluate(() => {
     const text = document.body.innerText;
-    const hasAwake = text.includes('Awake');
-    return { hasAwake };
+    return text.includes('Mode') && text.includes('Calm');
   });
-  console.log('  Screen Awake status in active session:', awakeStatus);
+  console.log('  Breathing session active without distracting eye icon:', sessionActive);
 
   console.log('\n--- Overall Errors ---');
   console.log('  Console errors:', errors.length);

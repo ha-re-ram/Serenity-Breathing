@@ -36,7 +36,6 @@ import { SessionRecord } from './types';
 import {
   initReminderScheduler,
   requestNotificationPermission,
-  testReminderNotification,
 } from './utils/reminderManager';
 
 interface CustomCycleCardProps {
@@ -238,15 +237,6 @@ export default function App() {
       toast.success(`Daily reminder set for ${val} 🌿`);
     }
   }, [reminderTimeState, updateProfile]);
-
-  const handleTestNotification = useCallback(async () => {
-    const res = await testReminderNotification();
-    if (res.success) {
-      toast.success(res.message);
-    } else {
-      toast.warning(res.message);
-    }
-  }, []);
 
   const handleOnboardingComplete = useCallback((data: {
     reminderTime: string;
@@ -508,10 +498,8 @@ export default function App() {
                             <span className="font-medium text-deep-forest block">Daily Reminder</span>
                             <span className="text-[11px] text-accent-green/75">
                               {typeof window !== 'undefined' && 'Notification' in window && Notification.permission === 'granted'
-                                ? '🔔 System notifications active'
-                                : typeof window !== 'undefined' && 'Notification' in window && Notification.permission === 'denied'
-                                ? '⚠️ Notifications blocked in browser'
-                                : 'Tap Test to verify alerts'}
+                                ? '🔔 Notifications active'
+                                : 'Set your daily mindfulness prompt'}
                             </span>
                           </div>
                         </div>
@@ -524,16 +512,6 @@ export default function App() {
                             onBlur={() => handleSaveReminder()}
                             className="w-28 sm:w-32 h-10 rounded-xl border-cream bg-bg-page/30 font-bold text-accent-green"
                           />
-                          <Button
-                            type="button"
-                            variant="outline"
-                            size="sm"
-                            onClick={handleTestNotification}
-                            className="h-10 px-3.5 rounded-xl border-cream text-accent-green hover:bg-muted font-bold text-xs"
-                            title="Send a test notification to verify delivery"
-                          >
-                            Test
-                          </Button>
                         </div>
                       </div>
                     </CardContent>
