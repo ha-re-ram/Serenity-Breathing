@@ -81,6 +81,12 @@ test('Breathing Session Machine: Warmup and Phase Cycling', () => {
   state = breathingSessionReducer(state, { type: 'RESUME' }, activePhases);
   assert.equal(state.status, 'breathing');
 
+  // Extend target seconds test
+  state = breathingSessionReducer(state, { type: 'EXTEND_TARGET', additionalSeconds: 120 }, activePhases);
+  assert.equal(state.targetSeconds, 180);
+  assert.equal(state.targetReached, false);
+  assert.equal(state.status, 'breathing');
+
   // Finish -> reflecting
   state = breathingSessionReducer(state, { type: 'FINISH' }, activePhases);
   assert.equal(state.status, 'reflecting');

@@ -36,6 +36,7 @@ export type BreathingSessionEvent =
   | { type: 'RESUME' }
   | { type: 'FINISH' }
   | { type: 'RECORD_MOOD'; mood?: string }
+  | { type: 'EXTEND_TARGET'; additionalSeconds: number }
   | { type: 'RESET'; initialPhase: SessionPhase; initialDuration: number; targetSeconds: number };
 
 /**
@@ -161,6 +162,15 @@ export function breathingSessionReducer(
       };
     }
 
+    case 'EXTEND_TARGET': {
+      return {
+        ...state,
+        targetSeconds: state.targetSeconds + event.additionalSeconds,
+        targetReached: false,
+        status: 'breathing',
+      };
+    }
+
     case 'RESET': {
       return {
         status: 'preparing',
@@ -283,6 +293,9 @@ export function useBreathingSessionMachine({
   const resume = useCallback(() => dispatch({ type: 'RESUME' }), []);
   const finish = useCallback(() => dispatch({ type: 'FINISH' }), []);
   const skipPrepare = useCallback(() => dispatch({ type: 'SKIP_PREPARE' }), []);
+  const extendTarget = useCallback((additionalSeconds: number) => {
+    dispatch({ type: 'EXTEND_TARGET', additionalSeconds });
+  }, []);
   
   const recordMoodAndEnd = useCallback((mood?: string) => {
     dispatch({ type: 'RECORD_MOOD', mood });
@@ -300,6 +313,7 @@ export function useBreathingSessionMachine({
     resume,
     finish,
     skipPrepare,
+    extendTarget,
     recordMoodAndEnd,
   };
 }

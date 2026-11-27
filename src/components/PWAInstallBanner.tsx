@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Download, Share2, PlusSquare, X, Smartphone, Sparkles } from 'lucide-react';
+import { Download, Share2, PlusSquare, X, Smartphone, Monitor, MoreVertical } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Button } from '@/components/ui/button';
 import { PWAInstallState } from '../hooks/usePWAInstall';
@@ -11,18 +11,19 @@ interface PWAInstallButtonProps {
 }
 
 export default function PWAInstallButton({ pwaState, variant = 'sidebar', className = '' }: PWAInstallButtonProps) {
-  const { isInstalled, canInstall, isIOS, install } = pwaState;
-  const [showIOSModal, setShowIOSModal] = useState(false);
+  const { isInstalled, isIOS, platform, install } = pwaState;
+  const [showManualModal, setShowManualModal] = useState(false);
 
-  // If already installed, never show the install button
+  // If already running in standalone PWA mode, never render
   if (isInstalled) {
     return null;
   }
 
   const handleClick = async () => {
     const outcome = await install();
-    if (outcome === 'manual' || isIOS) {
-      setShowIOSModal(true);
+    // If native prompt is not available or user is on iOS, show the guided instructions
+    if (outcome === 'manual') {
+      setShowManualModal(true);
     }
   };
 
@@ -63,7 +64,7 @@ export default function PWAInstallButton({ pwaState, variant = 'sidebar', classN
       {variant === 'card' && (
         <div className={`p-5 rounded-[28px] border border-soft-sage/40 bg-soft-sage/10 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 ${className}`}>
           <div className="flex items-center gap-3.5">
-            <div className="w-10 h-10 rounded-2xl bg-accent-green text-white flex items-center justify-center flex-shrink-0">
+            <div className="w-10 h-10 rounded-2xl bg-accent-green text-white dark:text-zinc-950 flex items-center justify-center flex-shrink-0">
               <Download className="w-5 h-5" />
             </div>
             <div>
@@ -82,9 +83,9 @@ export default function PWAInstallButton({ pwaState, variant = 'sidebar', classN
         </div>
       )}
 
-      {/* iOS Safari Step-by-Step Installation Modal */}
+      {/* Platform-Tailored PWA Installation Modal */}
       <AnimatePresence>
-        {showIOSModal && (
+        {showManualModal && (
           <div className="fixed inset-0 z-[110] bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
             <motion.div
               initial={{ opacity: 0, scale: 0.95, y: 15 }}
@@ -95,45 +96,142 @@ export default function PWAInstallButton({ pwaState, variant = 'sidebar', classN
               <div className="flex justify-between items-start">
                 <div className="flex items-center gap-2.5">
                   <div className="w-10 h-10 rounded-2xl bg-soft-sage/20 text-accent-green flex items-center justify-center">
-                    <Smartphone className="w-5 h-5 text-accent-green" />
+                    {isIOS ? (
+                      <Smartphone className="w-5 h-5 text-accent-green" />
+                    ) : (
+                      <Monitor className="w-5 h-5 text-accent-green" />
+                    )}
                   </div>
                   <div>
-                    <h3 className="font-serif text-lg text-deep-forest">Install on iOS</h3>
+                    <h3 className="font-serif text-lg text-deep-forest">
+                      {platform === 'ios_safari'
+                        ? 'Install on iPhone / iPad'
+                        : platform === 'ios_chrome'
+                        ? 'Install via Chrome on iOS'
+                        : platform === 'android_chrome'
+                        ? 'Install via Chrome on Android'
+                        : 'Install Serenity App'}
+                    </h3>
                     <p className="text-[10px] font-bold uppercase tracking-wider text-accent-green/70">
-                      Safari Home Screen
+                      {platform === 'ios_safari'
+                        ? 'Safari Home Screen'
+                        : platform === 'ios_chrome'
+                        ? 'Chrome Home Screen'
+                        : 'Fast Offline Access'}
                     </p>
                   </div>
                 </div>
                 <button
-                  onClick={() => setShowIOSModal(false)}
+                  onClick={() => setShowManualModal(false)}
                   className="p-1 rounded-full text-accent-green/60 hover:text-accent-green hover:bg-muted"
+                  aria-label="Close"
                 >
                   <X className="w-5 h-5" />
                 </button>
               </div>
 
-              <div className="space-y-3.5 text-xs text-deep-forest">
-                <div className="flex items-start gap-3 p-3 rounded-2xl bg-bg-page border border-cream/50">
-                  <div className="w-6 h-6 rounded-lg bg-soft-sage/20 flex items-center justify-center font-bold text-accent-green flex-shrink-0 text-xs">
-                    1
-                  </div>
-                  <p className="leading-relaxed">
-                    Tap the <strong className="text-accent-green inline-flex items-center gap-1 font-bold">Share <Share2 className="w-3.5 h-3.5 inline" /></strong> button in Safari's bottom toolbar.
-                  </p>
-                </div>
+              {/* Instructions based on platform */}
+              <div className="space-y-3 text-xs text-deep-forest">
+                {platform === 'ios_safari' && (
+                  <>
+                    <div className="flex items-start gap-3 p-3 rounded-2xl bg-bg-page border border-cream/50">
+                      <div className="w-6 h-6 rounded-lg bg-soft-sage/20 flex items-center justify-center font-bold text-accent-green flex-shrink-0 text-xs">
+                        1
+                      </div>
+                      <p className="leading-relaxed">
+                        Tap the <strong className="text-accent-green inline-flex items-center gap-1 font-bold">Share <Share2 className="w-3.5 h-3.5 inline" /></strong> button in Safari's bottom toolbar.
+                      </p>
+                    </div>
 
-                <div className="flex items-start gap-3 p-3 rounded-2xl bg-bg-page border border-cream/50">
-                  <div className="w-6 h-6 rounded-lg bg-soft-sage/20 flex items-center justify-center font-bold text-accent-green flex-shrink-0 text-xs">
-                    2
-                  </div>
-                  <p className="leading-relaxed">
-                    Scroll down and tap <strong className="text-accent-green inline-flex items-center gap-1 font-bold">Add to Home Screen <PlusSquare className="w-3.5 h-3.5 inline" /></strong>.
-                  </p>
-                </div>
+                    <div className="flex items-start gap-3 p-3 rounded-2xl bg-bg-page border border-cream/50">
+                      <div className="w-6 h-6 rounded-lg bg-soft-sage/20 flex items-center justify-center font-bold text-accent-green flex-shrink-0 text-xs">
+                        2
+                      </div>
+                      <p className="leading-relaxed">
+                        Scroll down and tap <strong className="text-accent-green inline-flex items-center gap-1 font-bold">Add to Home Screen <PlusSquare className="w-3.5 h-3.5 inline" /></strong>.
+                      </p>
+                    </div>
+
+                    <div className="flex items-start gap-3 p-3 rounded-2xl bg-bg-page border border-cream/50">
+                      <div className="w-6 h-6 rounded-lg bg-soft-sage/20 flex items-center justify-center font-bold text-accent-green flex-shrink-0 text-xs">
+                        3
+                      </div>
+                      <p className="leading-relaxed">
+                        Tap <strong className="text-accent-green font-bold">Add</strong> in the top right to complete.
+                      </p>
+                    </div>
+                  </>
+                )}
+
+                {platform === 'ios_chrome' && (
+                  <>
+                    <div className="flex items-start gap-3 p-3 rounded-2xl bg-bg-page border border-cream/50">
+                      <div className="w-6 h-6 rounded-lg bg-soft-sage/20 flex items-center justify-center font-bold text-accent-green flex-shrink-0 text-xs">
+                        1
+                      </div>
+                      <p className="leading-relaxed">
+                        Tap the <strong className="text-accent-green inline-flex items-center gap-1 font-bold">Share <Share2 className="w-3.5 h-3.5 inline" /></strong> icon in the address bar or tap the <strong className="text-accent-green font-bold">...</strong> menu.
+                      </p>
+                    </div>
+
+                    <div className="flex items-start gap-3 p-3 rounded-2xl bg-bg-page border border-cream/50">
+                      <div className="w-6 h-6 rounded-lg bg-soft-sage/20 flex items-center justify-center font-bold text-accent-green flex-shrink-0 text-xs">
+                        2
+                      </div>
+                      <p className="leading-relaxed">
+                        Scroll down and tap <strong className="text-accent-green inline-flex items-center gap-1 font-bold">Add to Home Screen <PlusSquare className="w-3.5 h-3.5 inline" /></strong>.
+                      </p>
+                    </div>
+                  </>
+                )}
+
+                {platform === 'android_chrome' && (
+                  <>
+                    <div className="flex items-start gap-3 p-3 rounded-2xl bg-bg-page border border-cream/50">
+                      <div className="w-6 h-6 rounded-lg bg-soft-sage/20 flex items-center justify-center font-bold text-accent-green flex-shrink-0 text-xs">
+                        1
+                      </div>
+                      <p className="leading-relaxed">
+                        Tap the <strong className="text-accent-green inline-flex items-center gap-1 font-bold">menu <MoreVertical className="w-3.5 h-3.5 inline" /></strong> in Chrome's top-right corner.
+                      </p>
+                    </div>
+
+                    <div className="flex items-start gap-3 p-3 rounded-2xl bg-bg-page border border-cream/50">
+                      <div className="w-6 h-6 rounded-lg bg-soft-sage/20 flex items-center justify-center font-bold text-accent-green flex-shrink-0 text-xs">
+                        2
+                      </div>
+                      <p className="leading-relaxed">
+                        Select <strong className="text-accent-green font-bold">Install app</strong> or <strong className="text-accent-green font-bold">Add to Home screen</strong>.
+                      </p>
+                    </div>
+                  </>
+                )}
+
+                {(platform === 'desktop_chrome' || platform === 'other') && (
+                  <>
+                    <div className="flex items-start gap-3 p-3 rounded-2xl bg-bg-page border border-cream/50">
+                      <div className="w-6 h-6 rounded-lg bg-soft-sage/20 flex items-center justify-center font-bold text-accent-green flex-shrink-0 text-xs">
+                        1
+                      </div>
+                      <p className="leading-relaxed">
+                        Look for the <strong className="text-accent-green inline-flex items-center gap-1 font-bold">Install App (⊕)</strong> icon in your browser address bar on the right.
+                      </p>
+                    </div>
+
+                    <div className="flex items-start gap-3 p-3 rounded-2xl bg-bg-page border border-cream/50">
+                      <div className="w-6 h-6 rounded-lg bg-soft-sage/20 flex items-center justify-center font-bold text-accent-green flex-shrink-0 text-xs">
+                        2
+                      </div>
+                      <p className="leading-relaxed">
+                        Or click the browser menu <strong className="text-accent-green font-bold">(⋮)</strong> and click <strong className="text-accent-green font-bold">Install Serenity Breathing...</strong>
+                      </p>
+                    </div>
+                  </>
+                )}
               </div>
 
               <Button
-                onClick={() => setShowIOSModal(false)}
+                onClick={() => setShowManualModal(false)}
                 className="w-full bg-accent-green hover:bg-deep-forest text-white dark:text-zinc-950 rounded-full text-xs font-bold uppercase tracking-wider h-11"
               >
                 Got it

@@ -33,6 +33,11 @@ import {
   DEFAULT_USER_PROFILE,
 } from './machines';
 import { SessionRecord } from './types';
+import {
+  initReminderScheduler,
+  requestNotificationPermission,
+  testReminderNotification,
+} from './utils/reminderManager';
 
 interface CustomCycleCardProps {
   initialConfig: { inhale: number; hold: number; exhale: number; holdPost: number };
@@ -143,6 +148,16 @@ export default function App() {
     }
   }, [profile?.reminderTime]);
 
+  // Daily reminder scheduler watcher
+  useEffect(() => {
+    const cleanup = initReminderScheduler(profile?.reminderTime, () => {
+      toast.info('🌿 Daily Reminder: Take 3 minutes to breathe and restore your calm.', {
+        duration: 12000,
+      });
+    });
+    return cleanup;
+  }, [profile?.reminderTime]);
+
   // 2. Navigation & Modal Hierarchy State Machine
   const {
     activeTab,
@@ -209,11 +224,29 @@ export default function App() {
     toast.success('Habit removed');
   }, [updateProfile]);
 
-  const handleSaveReminder = useCallback((explicitTime?: string) => {
+  const handleSaveReminder = useCallback(async (explicitTime?: string) => {
     const val = (explicitTime !== undefined ? explicitTime : reminderTimeState) || '08:00';
     updateProfile((prev) => ({ ...prev, reminderTime: val }));
-    toast.success(`Daily reminder set for ${val} 🌿`);
+    
+    // Request notification permission on user gesture
+    const perm = await requestNotificationPermission();
+    if (perm === 'granted') {
+      toast.success(`Daily reminder set for ${val} 🌿 Notifications active!`);
+    } else if (perm === 'denied') {
+      toast.warning(`Reminder set for ${val}, but browser notifications are blocked in site settings.`);
+    } else {
+      toast.success(`Daily reminder set for ${val} 🌿`);
+    }
   }, [reminderTimeState, updateProfile]);
+
+  const handleTestNotification = useCallback(async () => {
+    const res = await testReminderNotification();
+    if (res.success) {
+      toast.success(res.message);
+    } else {
+      toast.warning(res.message);
+    }
+  }, []);
 
   const handleOnboardingComplete = useCallback((data: {
     reminderTime: string;
@@ -466,20 +499,42 @@ export default function App() {
                           {theme === 'dark' ? 'On' : 'Off'}
                         </Button>
                       </div>
-                      <div className="flex justify-between items-center">
+                      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
                         <div className="flex items-center gap-3">
-                          <div className="w-10 h-10 rounded-2xl bg-bg-page flex items-center justify-center">
+                          <div className="w-10 h-10 rounded-2xl bg-bg-page flex items-center justify-center flex-shrink-0">
                             <Bell className="w-5 h-5 text-soft-sage" />
                           </div>
-                          <span className="font-medium text-deep-forest">Daily Reminder</span>
+                          <div>
+                            <span className="font-medium text-deep-forest block">Daily Reminder</span>
+                            <span className="text-[11px] text-accent-green/75">
+                              {typeof window !== 'undefined' && 'Notification' in window && Notification.permission === 'granted'
+                                ? '🔔 System notifications active'
+                                : typeof window !== 'undefined' && 'Notification' in window && Notification.permission === 'denied'
+                                ? '⚠️ Notifications blocked in browser'
+                                : 'Tap Test to verify alerts'}
+                            </span>
+                          </div>
                         </div>
-                        <Input
-                          type="time"
-                          value={reminderTimeState}
-                          onChange={(e) => setReminderTimeState(e.target.value)}
-                          onBlur={() => handleSaveReminder()}
-                          className="w-32 h-10 rounded-xl border-cream bg-bg-page/30 font-bold text-accent-green"
-                        />
+                        <div className="flex items-center gap-2 w-full sm:w-auto justify-end">
+                          <Input
+                            type="time"
+                            aria-label="Daily reminder time"
+                            value={reminderTimeState}
+                            onChange={(e) => setReminderTimeState(e.target.value)}
+                            onBlur={() => handleSaveReminder()}
+                            className="w-28 sm:w-32 h-10 rounded-xl border-cream bg-bg-page/30 font-bold text-accent-green"
+                          />
+                          <Button
+                            type="button"
+                            variant="outline"
+                            size="sm"
+                            onClick={handleTestNotification}
+                            className="h-10 px-3.5 rounded-xl border-cream text-accent-green hover:bg-muted font-bold text-xs"
+                            title="Send a test notification to verify delivery"
+                          >
+                            Test
+                          </Button>
+                        </div>
                       </div>
                     </CardContent>
                   </Card>

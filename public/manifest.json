@@ -1,22 +1,40 @@
 {
+  "id": "/",
   "name": "Serenity Breathing",
   "short_name": "Serenity",
   "description": "A professional-grade mindfulness app for guided breathing and stress reduction.",
   "start_url": "/",
+  "scope": "/",
   "display": "standalone",
+  "orientation": "portrait-primary",
   "background_color": "#F4F7F5",
   "theme_color": "#245C42",
+  "categories": ["health", "lifestyle", "medical"],
+  "prefer_related_applications": false,
   "icons": [
     {
       "src": "/icon.png",
       "sizes": "192x192",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icon.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable"
     },
     {
       "src": "/icon.png",
       "sizes": "512x512",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icon.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
     }
-
   ]
 }

@@ -11,6 +11,7 @@ import {
   Music,
   Sliders,
   Check,
+  Eye,
 } from 'lucide-react';
 import { BreathingMode } from '../types';
 import BreathingCircle from './BreathingCircle';
@@ -19,7 +20,8 @@ import { Slider } from '@/components/ui/slider';
 import MoodCheck from './MoodCheck';
 import { useBreathingSessionMachine, SessionPhase } from '../machines/breathingSessionMachine';
 import { useSoundMachine } from '../machines/soundMachine';
-import { AmbientSoundType } from '../services/audioEngine';
+import { AmbientSoundType, audioEngine } from '../services/audioEngine';
+import { useWakeLock } from '../hooks/useWakeLock';
 
 export interface SessionScreenProps {
   mode: BreathingMode;
@@ -47,6 +49,7 @@ export default function SessionScreen({
     resume,
     finish,
     skipPrepare,
+    extendTarget,
     recordMoodAndEnd,
   } = useBreathingSessionMachine({
     mode,
@@ -55,6 +58,31 @@ export default function SessionScreen({
     onEnd,
     enableWarmup: true,
   });
+
+  const { isLocked: isScreenAwake } = useWakeLock(state.status === 'breathing');
+  const [showGoalModal, setShowGoalModal] = useState(false);
+  const [hasPromptedGoal, setHasPromptedGoal] = useState(false);
+
+  // When session goal duration is reached, pause, notify with completion chime & haptic, and prompt user
+  useEffect(() => {
+    if (state.targetReached && !hasPromptedGoal && state.status === 'breathing') {
+      setHasPromptedGoal(true);
+      pause();
+      try {
+        audioEngine.playSingingBowl(528);
+      } catch {
+        // Safe audio fallback
+      }
+      if (typeof navigator !== 'undefined' && 'vibrate' in navigator) {
+        try {
+          navigator.vibrate([200, 100, 200, 100, 300]);
+        } catch {
+          // Ignore
+        }
+      }
+      setShowGoalModal(true);
+    }
+  }, [state.targetReached, hasPromptedGoal, state.status, pause]);
 
   const {
     isMuted,
@@ -161,7 +189,19 @@ export default function SessionScreen({
           <span className="text-[10px] font-bold text-accent-green/70 uppercase tracking-[2px]">
             Mode
           </span>
-          <h2 className="text-lg sm:text-xl font-serif text-deep-forest">{config.label}</h2>
+          <div className="flex items-center gap-1.5">
+            <h2 className="text-lg sm:text-xl font-serif text-deep-forest">{config.label}</h2>
+            {isScreenAwake && (
+              <span
+                className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-soft-sage/20 border border-soft-sage/30 text-[9px] font-bold text-accent-green"
+                title="Screen awake lock active: display will not sleep while breathing"
+              >
+                <span className="w-1.5 h-1.5 rounded-full bg-accent-green animate-pulse" />
+                <Eye className="w-2.5 h-2.5 text-accent-green" />
+                <span className="hidden sm:inline">Awake</span>
+              </span>
+            )}
+          </div>
         </div>
 
         {/* Audio & Playback Controls */}
@@ -495,6 +535,76 @@ export default function SessionScreen({
               >
                 Done
               </Button>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* Session Goal Completed Prompt Modal */}
+      <AnimatePresence>
+        {showGoalModal && (
+          <div className="fixed inset-0 z-[120] bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.9, y: 20 }}
+              className="bg-card text-card-foreground rounded-[32px] p-6 sm:p-8 max-w-sm w-full border border-cream shadow-2xl flex flex-col items-center text-center gap-5"
+            >
+              <div className="w-14 h-14 rounded-2xl bg-soft-sage/25 text-accent-green flex items-center justify-center shadow-inner">
+                <Sparkles className="w-7 h-7 text-accent-green" />
+              </div>
+
+              <div>
+                <h3 className="text-2xl font-serif text-deep-forest mb-1">Goal Reached!</h3>
+                <p className="text-xs text-accent-green/80">
+                  You completed your planned {targetDurationMinutes}-minute mindful session.
+                </p>
+              </div>
+
+              <div className="w-full p-4 rounded-2xl bg-bg-page border border-cream/60 flex justify-around text-xs text-deep-forest">
+                <div className="flex flex-col items-center">
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-accent-green/60">Time</span>
+                  <span className="font-mono font-bold text-sm text-accent-green">{formatTime(state.elapsedSeconds)}</span>
+                </div>
+                <div className="w-[1px] bg-cream/80" />
+                <div className="flex flex-col items-center">
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-accent-green/60">Cycles</span>
+                  <span className="font-mono font-bold text-sm text-accent-green">{state.completedCycles} cycles</span>
+                </div>
+              </div>
+
+              <div className="w-full flex flex-col gap-2.5 pt-2">
+                <Button
+                  onClick={() => {
+                    setShowGoalModal(false);
+                    finish();
+                  }}
+                  className="w-full bg-accent-green hover:bg-deep-forest text-white dark:text-zinc-950 rounded-full font-bold uppercase tracking-wider text-xs h-11 shadow-lg shadow-accent-green/20"
+                >
+                  <CheckCircle2 className="w-4 h-4 mr-2" /> Complete & Reflect
+                </Button>
+
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    setShowGoalModal(false);
+                    extendTarget(120);
+                  }}
+                  className="w-full border-cream text-accent-green hover:bg-muted rounded-full font-bold uppercase tracking-wider text-xs h-11"
+                >
+                  Continue (+2 Min)
+                </Button>
+
+                <button
+                  onClick={() => {
+                    setShowGoalModal(false);
+                    extendTarget(3600);
+                  }}
+                  className="text-[11px] font-bold text-accent-green/70 hover:text-accent-green uppercase tracking-wider py-1 transition-colors"
+                >
+                  Keep Flowing (Open Ended)
+                </button>
+              </div>
             </motion.div>
           </div>
         )}

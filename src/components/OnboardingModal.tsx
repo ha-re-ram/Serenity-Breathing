@@ -5,6 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card } from '@/components/ui/card';
 import { useOnboardingMachine, ONBOARDING_PRESETS } from '../machines/onboardingMachine';
+import { requestNotificationPermission } from '../utils/reminderManager';
 
 interface OnboardingModalProps {
   onComplete: (data: {
@@ -26,10 +27,14 @@ export default function OnboardingModal({ onComplete }: OnboardingModalProps) {
     applyPreset,
   } = useOnboardingMachine();
 
-  const handleNext = () => {
+  const handleNext = async () => {
     if (!isLastStep) {
+      if (state.currentStep === 'reminder') {
+        requestNotificationPermission().catch(() => {});
+      }
       nextStep();
     } else {
+      requestNotificationPermission().catch(() => {});
       onComplete({
         reminderTime: state.reminderTime,
         customBreathing: state.customBreathing,

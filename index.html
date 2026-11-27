@@ -195,6 +195,14 @@
     <link rel="icon" href="/icon.png" />
     <link rel="apple-touch-icon" href="/icon.png" />
 
+    <!-- Early PWA Install Prompt Capture: Never miss beforeinstallprompt before React mounts -->
+    <script>
+      window.addEventListener('beforeinstallprompt', function(e) {
+        e.preventDefault();
+        window.__deferredPWAInstallPrompt = e;
+      });
+    </script>
+
     <!-- Self-healing error recovery for stale cached shells or chunk hash mismatches -->
     <script>
       window.addEventListener('error', function(e) {
